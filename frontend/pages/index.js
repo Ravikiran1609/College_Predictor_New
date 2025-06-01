@@ -1,30 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
+  const [branch, setBranch] = useState("");
   const [rank, setRank] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [locked, setLocked] = useState(false);
   const [eligibleCount, setEligibleCount] = useState(0);
   const [eligibleColleges, setEligibleColleges] = useState([]);
   const [paid, setPaid] = useState(false);
 
-  const apiURL = ""; // Replace this when deployed!
+  // For nginx proxy, apiURL can be empty
+  const apiURL = "";
+
+  useEffect(() => {
+    fetch(`${apiURL}/api/options`)
+      .then(res => res.json())
+      .then(data => {
+        setCourses(data.courses);
+        setCategories(data.categories);
+        setBranches(data.branches);
+      });
+  }, []);
 
   const handlePredict = async () => {
-    const res = await fetch(`/api/predict`, {
+    const res = await fetch(`${apiURL}/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course, category, rank }),
+      body: JSON.stringify({ course, category, branch, rank }),
     });
     const data = await res.json();
     setEligibleCount(data.eligibleCount);
     setLocked(true);
   };
 
-  // Razorpay payment handler
   const handlePayment = async () => {
-    const res = await fetch(`/api/create-order`, {
+    // Razorpay script loader (see previous messages for async loading)
+    if (!window.Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+      await new Promise((resolve) => {
+        script.onload = resolve;
+      });
+    }
+
+    const res = await fetch(`${apiURL}/api/create-order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: 10 }), // ₹10
@@ -32,28 +57,23 @@ export default function Home() {
     const order = await res.json();
 
     const options = {
-      key: "rzp_test_xxxxxxxx", // Replace with your Razorpay key
+      key: "rzp_test_xxxxxxxx", // Your Razorpay key
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",
       description: "Access your eligible colleges list",
       order_id: order.id,
-      handler: async function (response) {
+      handler: async function () {
         setPaid(true);
-        // Now fetch unlocked data
-        const res2 = await fetch(`/api/unlock`, {
+        const res2 = await fetch(`${apiURL}/api/unlock`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ course, category, rank }),
+          body: JSON.stringify({ course, category, branch, rank }),
         });
         const data2 = await res2.json();
         setEligibleColleges(data2.eligibleColleges);
       },
-      prefill: {
-        name: "",
-        email: "",
-        contact: "",
-      },
+      prefill: { name: "", email: "", contact: "" },
       theme: { color: "#0d9488" },
     };
 
@@ -63,17 +83,40 @@ export default function Home() {
 
   return (
     <main style={{ padding: 24, fontFamily: "sans-serif", maxWidth: 600, margin: "0 auto" }}>
-      <h1>CET College Predictor</h1>
+      <h1 style={{ fontWeight: "bold", fontSize: 42 }}>CET College Predictor</h1>
       <div>
-        <label>Course:
-          <input value={course} onChange={e => setCourse(e.target.value)} placeholder="e.g. ENGG"/>
+        <label>
+          Course:
+          <select value={course} onChange={e => setCourse(e.target.value)}>
+            <option value="">Select Course</option>
+            {courses.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </label>
         <br />
-        <label>Category:
-          <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. GM"/>
+        <label>
+          Category:
+          <select value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="">Select Category</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </label>
         <br />
-        <label>Rank:
+        <label>
+          Branch:
+          <select value={branch} onChange={e => setBranch(e.target.value)}>
+            <option value="">Select Branch</option>
+            {branches.map(b => (
+              <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+        </label>
+        <br />
+        <label>
+          Rank:
           <input value={rank} onChange={e => setRank(e.target.value)} />
         </label>
       </div>
@@ -81,9 +124,10 @@ export default function Home() {
       <button onClick={handlePredict}>Find Eligible Colleges</button>
       {locked && !paid && (
         <div>
-          <p><b>{eligibleCount}</b> colleges found. <b>Pay ₹10</b> to unlock full list & download!</p>
+          <p>
+            <b>{eligibleCount}</b> colleges found. <b>Pay ₹10</b> to unlock full list & download!
+          </p>
           <button onClick={handlePayment}>Pay & Unlock</button>
-          <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         </div>
       )}
       {paid && (
