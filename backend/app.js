@@ -20,8 +20,8 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (replace with your test or live keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_xxxxxxxx",      // <-- Replace with your Razorpay key
-  key_secret: "xxxxxxxxxxxxxxxx",   // <-- Replace with your Razorpay secret
+  key_id: "rzp_test_ER74p2Xn18YWLz",      // <-- Replace with your Razorpay key
+  key_secret: "JpaesAE4XLuxmla7xi0xW8tW",   // <-- Replace with your Razorpay secret
 });
 
 // --- Dropdown API for UI options ---
