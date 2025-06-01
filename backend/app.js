@@ -19,8 +19,8 @@ fs.createReadStream("Final_Data.csv")
   .on("end", () => console.log("CSV Loaded:", records.length, "rows"));
 
 const razorpay = new Razorpay({
-  key_id: "rzp_test_xxxxxxxxxxxx",   // <-- YOUR Razorpay TEST key here!
-  key_secret: "xxxxxxxxxxxxxxxxxxxx" // <-- YOUR Razorpay TEST secret here!
+  key_id: "rzp_test_SmAPbhfUjKXBRl",   // <-- YOUR Razorpay TEST key here!
+  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN" // <-- YOUR Razorpay TEST secret here!
 });
 
 // API for dropdowns
