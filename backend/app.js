@@ -18,12 +18,13 @@ fs.createReadStream("Final_Data.csv")
   .on("data", (row) => records.push(row))
   .on("end", () => console.log("CSV Loaded:", records.length, "rows"));
 
+// Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_SmAPbhfUjKXBRl",   // <-- YOUR Razorpay TEST key here!
-  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN" // <-- YOUR Razorpay TEST secret here!
+  key_id: "rzp_test_xxxxxxxxxxxx",
+  key_secret: "xxxxxxxxxxxxxxxxxxxx",
 });
 
-// API for dropdowns
+// Dropdown options
 app.get("/api/options", (req, res) => {
   const courses = [...new Set(records.map(r => r.course))].sort();
   const categories = [...new Set(records.map(r => r.category))].sort();
@@ -31,7 +32,7 @@ app.get("/api/options", (req, res) => {
   res.json({ courses, categories, branches });
 });
 
-// POST API to check number of eligible colleges
+// Eligibility prediction (count only)
 app.post("/api/predict", (req, res) => {
   const { course, category, branch, rank } = req.body;
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
@@ -69,18 +70,36 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// POST API to unlock and return sorted data
+// Unlock after payment: return eligible + near miss colleges
 app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
-  let result = records.filter(
+  const userRank = parseInt(rank);
+
+  // Eligible: userRank <= cutoff_rank
+  let eligible = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
       (!branch || r.branch === branch) &&
-      parseInt(rank) <= parseInt(r.cutoff_rank)
+      userRank <= parseInt(r.cutoff_rank)
   );
-  result = result.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
-  res.json({ eligibleColleges: result });
+  eligible = eligible.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
+
+  // Near miss: cutoff_rank > userRank && cutoff_rank <= userRank + 2000
+  let nearMiss = records.filter(
+    (r) =>
+      r.course.toLowerCase() === course.toLowerCase() &&
+      r.category.toLowerCase() === category.toLowerCase() &&
+      (!branch || r.branch === branch) &&
+      parseInt(r.cutoff_rank) > userRank &&
+      parseInt(r.cutoff_rank) <= userRank + 2000
+  );
+  nearMiss = nearMiss.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
+
+  res.json({
+    eligibleColleges: eligible,
+    nearMissColleges: nearMiss,
+  });
 });
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
