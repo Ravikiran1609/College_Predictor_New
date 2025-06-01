@@ -9,7 +9,7 @@ export default function Home() {
   const [eligibleColleges, setEligibleColleges] = useState([]);
   const [paid, setPaid] = useState(false);
 
-  const apiURL = "https://<YOUR_BACKEND_URL>"; // Replace this when deployed!
+  const apiURL = "http://3.89.226.241"; // Replace this when deployed!
 
   const handlePredict = async () => {
     const res = await fetch(`${apiURL}/api/predict`, {
