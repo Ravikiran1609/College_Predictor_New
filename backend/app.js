@@ -18,13 +18,12 @@ fs.createReadStream("Final_Data.csv")
   .on("data", (row) => records.push(row))
   .on("end", () => console.log("CSV Loaded:", records.length, "rows"));
 
-// Razorpay config (replace with your test or live keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_ER74p2Xn18YWLz",      // <-- Replace with your Razorpay key
-  key_secret: "JpaesAE4XLuxmla7xi0xW8tW",   // <-- Replace with your Razorpay secret
+  key_id: "rzp_test_xxxxxxxxxxxx",   // <-- YOUR Razorpay TEST key here!
+  key_secret: "xxxxxxxxxxxxxxxxxxxx" // <-- YOUR Razorpay TEST secret here!
 });
 
-// --- Dropdown API for UI options ---
+// API for dropdowns
 app.get("/api/options", (req, res) => {
   const courses = [...new Set(records.map(r => r.course))].sort();
   const categories = [...new Set(records.map(r => r.category))].sort();
@@ -32,11 +31,10 @@ app.get("/api/options", (req, res) => {
   res.json({ courses, categories, branches });
 });
 
-// --- Predict colleges API ---
+// POST API to check number of eligible colleges
 app.post("/api/predict", (req, res) => {
   const { course, category, branch, rank } = req.body;
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
-
   const result = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
@@ -47,23 +45,23 @@ app.post("/api/predict", (req, res) => {
   res.json({ eligibleCount: result.length, locked: true });
 });
 
-// --- Razorpay order creation ---
+// Razorpay order creation
 app.post("/api/create-order", async (req, res) => {
   const { amount } = req.body;
   const payment_capture = 1;
   const currency = "INR";
   const options = {
-    amount: amount * 100, // in paise
+    amount: amount * 100,
     currency,
     receipt: "order_rcptid_11",
-    payment_capture,
+    payment_capture
   };
   try {
     const response = await razorpay.orders.create(options);
     res.json({
       id: response.id,
       currency: response.currency,
-      amount: response.amount,
+      amount: response.amount
     });
   } catch (error) {
     console.error("Razorpay error:", error);
@@ -71,16 +69,17 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// --- Unlock after payment ---
+// POST API to unlock and return sorted data
 app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
-  const result = records.filter(
+  let result = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
       (!branch || r.branch === branch) &&
       parseInt(rank) <= parseInt(r.cutoff_rank)
   );
+  result = result.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
   res.json({ eligibleColleges: result });
 });
 
