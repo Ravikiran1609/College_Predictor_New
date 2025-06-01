@@ -1,18 +1,30 @@
-version: "3"
+version: "3.8"
 services:
   backend:
     build: ./backend
-    ports:
-      - "5000:5000"
+    container_name: backend
+    restart: unless-stopped
+    expose:
+      - "5000"
     environment:
       - NODE_ENV=production
+
   frontend:
     build: ./frontend
-    ports:
-      - "3000:3000"
+    container_name: frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
-      - API_URL=http://3.89.226.241:5000   # Set this in frontend/pages/index.js also!
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
     depends_on:
+      - frontend
       - backend
 

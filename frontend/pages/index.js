@@ -9,10 +9,10 @@ export default function Home() {
   const [eligibleColleges, setEligibleColleges] = useState([]);
   const [paid, setPaid] = useState(false);
 
-  const apiURL = "http://3.89.226.241"; // Replace this when deployed!
+  const apiURL = ""; // Replace this when deployed!
 
   const handlePredict = async () => {
-    const res = await fetch(`${apiURL}/api/predict`, {
+    const res = await fetch(`/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ course, category, rank }),
@@ -24,7 +24,7 @@ export default function Home() {
 
   // Razorpay payment handler
   const handlePayment = async () => {
-    const res = await fetch(`${apiURL}/api/create-order`, {
+    const res = await fetch(`/api/create-order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: 10 }), // ₹10
@@ -41,7 +41,7 @@ export default function Home() {
       handler: async function (response) {
         setPaid(true);
         // Now fetch unlocked data
-        const res2 = await fetch(`${apiURL}/api/unlock`, {
+        const res2 = await fetch(`/api/unlock`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ course, category, rank }),
