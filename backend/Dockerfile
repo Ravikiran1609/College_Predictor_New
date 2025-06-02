@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy and install dependencies
 COPY package.json package-lock.json* ./
 RUN npm install --production
+RUN npm install pdfkit
 
 # Copy source code and data
 COPY app.js ./
