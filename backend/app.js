@@ -8,7 +8,6 @@ const PDFDocument = require("pdfkit");
 
 const app = express();
 app.use(cors());
-// FIX: support up to 10mb POSTs
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(express.json({ limit: "10mb" }));
 
@@ -101,7 +100,7 @@ app.post("/api/unlock", (req, res) => {
   res.json({ groupedEligible: grouped });
 });
 
-// ======= PDF REPORT ENDPOINT (Grouped By Branch) ======= //
+// ======= PDF REPORT ENDPOINT (Grouped Table By Branch) ======= //
 app.post("/api/generate-pdf", (req, res) => {
   const { groupedEligible } = req.body;
   const doc = new PDFDocument({ margin: 30, size: "A4" });
@@ -117,17 +116,57 @@ app.post("/api/generate-pdf", (req, res) => {
     doc.fontSize(13).fillColor("red").text("No eligible colleges found.");
   } else {
     for (const branchName of Object.keys(groupedEligible)) {
-      doc.fontSize(14).fillColor("green").text(branchName, { underline: true });
+      // Branch header
+      doc.fontSize(15).fillColor("green").text(branchName, { underline: true });
+      doc.moveDown(0.2);
+
+      // Table header
+      doc.fontSize(12).fillColor("black");
+      doc.text(
+        [
+          padCell("College Code", 15),
+          padCell("College Name", 45),
+          padCell("Course", 8),
+          padCell("Category", 10),
+          padCell("Cutoff Rank", 12),
+        ].join(""),
+        { continued: false }
+      );
+      doc.moveDown(0.1);
+      doc.fontSize(11);
+
+      // Divider line
+      doc.text(
+        "".padEnd(90, "-"),
+        { continued: false }
+      );
+
+      // Table rows
       groupedEligible[branchName].forEach((col, idx) => {
-        doc.fontSize(11).fillColor("black").text(
-          `${idx + 1}. ${col.college_name} (${col.college_code}) | Course: ${col.course} | Category: ${col.category} | Cutoff Rank: ${col.cutoff_rank}`
+        doc.text(
+          [
+            padCell(col.college_code, 15),
+            padCell(col.college_name, 45),
+            padCell(col.course, 8),
+            padCell(col.category, 10),
+            padCell(col.cutoff_rank, 12),
+          ].join(""),
+          { continued: false }
         );
       });
-      doc.moveDown();
+
+      doc.moveDown(1.2);
     }
   }
   doc.end();
 });
+
+// Helper function for "columnized" text output
+function padCell(text, width) {
+  text = String(text || "");
+  if (text.length >= width) return text.slice(0, width - 2) + ".. ";
+  return text + " ".repeat(width - text.length);
+}
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
 

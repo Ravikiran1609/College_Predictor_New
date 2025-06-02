@@ -1,4 +1,110 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+body {
+  background: linear-gradient(135deg, #f0fdfa 0%, #dbeafe 100%);
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.header-gradient {
+  background: linear-gradient(90deg, #7c3aed 0%, #f472b6 50%, #34d399 100%);
+  box-shadow: 0 4px 24px 0 #e0e7ff80;
+}
+
+.ct-main-card {
+  background: #fffdfb;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 #a5b4fc20;
+  border: 1px solid #dbeafe;
+  max-width: 860px;
+  margin: -48px auto 48px;
+  padding: 32px 24px;
+}
+
+.note-alert {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #a5b4fc;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1rem;
+}
+
+.branch-section {
+  background: #fff;
+  border-radius: 16px;
+  border: 2px solid #d1fae5;
+  margin-bottom: 36px;
+  box-shadow: 0 4px 16px 0 #e0e7ff40;
+  padding: 32px 16px;
+}
+
+.branch-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #059669;
+  border-bottom: 2px solid #6ee7b7;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.table-elig {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafafa;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.table-elig th, .table-elig td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #dbeafe;
+  text-align: left;
+}
+
+.table-elig th {
+  background: #a7f3d0;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.table-elig tr:nth-child(even) td {
+  background: #f0fdfa;
+}
+
+.ct-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #6366f1 0%, #10b981 100%);
+  color: #fff;
+  font-weight: bold;
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  border: none;
+  box-shadow: 0 2px 10px #6366f120;
+  transition: transform 0.08s;
+  margin: 10px;
+  cursor: pointer;
+}
+.ct-btn:hover {
+  transform: scale(1.04);
+  background: linear-gradient(90deg, #f43f5e 0%, #10b981 100%);
+}
+
+@media (max-width: 700px) {
+  .ct-main-card {
+    padding: 12px 4vw;
+  }
+  .branch-section {
+    padding: 20px 2vw;
+  }
+  .branch-title {
+    font-size: 1.13rem;
+  }
+  .table-elig th, .table-elig td {
+    padding: 8px 6px;
+    font-size: 0.97rem;
+  }
+}
 

@@ -131,42 +131,43 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-pink-50 to-emerald-100 flex flex-col items-center px-2">
+    <div>
       {/* HEADER */}
-      <header className="w-full flex flex-col items-center py-12 px-3 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-400 shadow-lg mb-[-56px] relative z-10">
-        <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="header-gradient" style={{width: "100%", paddingTop: 32, paddingBottom: 32, marginBottom: -36}}>
+        <div style={{maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 28}}>
           <div>
             <img
               src="https://cdn.pixabay.com/photo/2016/10/28/22/03/book-1780453_1280.png"
               alt="College Hero"
-              className="w-32 h-32 rounded-2xl border-4 border-white shadow-2xl bg-white object-cover"
+              style={{width: 90, height: 90, borderRadius: 20, border: "4px solid #fff", background: "#fff", boxShadow: "0 4px 16px #fff8"}}
             />
           </div>
-          <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-5xl font-black text-white mb-2 drop-shadow-lg">CET College Predictor</h1>
-            <p className="text-lg md:text-2xl text-white/90 font-medium mb-2 text-center md:text-left">
-              Discover your college destiny. <br className="hidden md:inline" />
-              <span className="bg-white/30 px-2 py-1 rounded text-emerald-900">Unlock your best possibilities!</span>
-            </p>
+          <div>
+            <h1 style={{fontSize: "2.7rem", fontWeight: 900, color: "#fff", margin: "0 0 7px"}}>CET College Predictor</h1>
+            <p style={{fontSize: 22, color: "#f0f9ff", margin: 0}}>Discover your college destiny.<br/>Unlock your best possibilities!</p>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* MAIN CARD */}
-      <main className="w-full max-w-3xl mx-auto rounded-3xl shadow-xl bg-white/80 mt-[-48px] mb-10 p-8 backdrop-blur-lg border border-indigo-100 z-20 relative">
-        <div className="mb-6 p-4 rounded-lg bg-indigo-50/80 border border-indigo-200 text-indigo-700 text-sm font-medium text-center">
+      <main className="ct-main-card">
+        <div className="note-alert">
           Prediction is purely based on previous year cutoff. It may vary for present year.
         </div>
 
         {formError && (
-          <div className="mb-4 rounded text-sm bg-red-100 text-red-700 px-4 py-2 border border-red-200 text-center">{formError}</div>
+          <div style={{background: "#fca5a5", color: "#7f1d1d", padding: "12px", borderRadius: 8, textAlign: "center", marginBottom: 14}}>
+            {formError}
+          </div>
         )}
 
         {/* FORM */}
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={e => { e.preventDefault(); handlePredict(); }}>
+        <form
+          style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20}}
+          onSubmit={e => { e.preventDefault(); handlePredict(); }}
+        >
           <div>
-            <label className="font-semibold text-indigo-700 block mb-1">Course</label>
-            <select className="w-full border-2 border-indigo-200 rounded-lg px-4 py-2 mt-1 bg-white" value={course} onChange={e => setCourse(e.target.value)} required>
+            <label style={{fontWeight: 600, color: "#3730a3"}}>Course</label>
+            <select style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 8, padding: "8px 8px", marginTop: 5}} value={course} onChange={e => setCourse(e.target.value)} required>
               <option value="">Select Course</option>
               {courses.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -174,73 +175,68 @@ export default function Home() {
             </select>
           </div>
           <div>
-            <label className="font-semibold text-emerald-700 block mb-1">Category</label>
-            <select className="w-full border-2 border-emerald-200 rounded-lg px-4 py-2 mt-1 bg-white" value={category} onChange={e => setCategory(e.target.value)} required>
+            <label style={{fontWeight: 600, color: "#059669"}}>Category</label>
+            <select style={{width: "100%", fontSize: 17, border: "2px solid #bbf7d0", borderRadius: 8, padding: "8px 8px", marginTop: 5}} value={category} onChange={e => setCategory(e.target.value)} required>
               <option value="">Select Category</option>
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
-          <div className="md:col-span-2">
-            <label className="font-semibold text-indigo-700 block mb-1">Your Rank</label>
-            <input type="number" min="1" className="w-full border-2 border-indigo-200 rounded-lg px-4 py-2 mt-1 bg-white" value={rank} onChange={e => setRank(e.target.value)} required />
+          <div style={{gridColumn: "1 / span 2"}}>
+            <label style={{fontWeight: 600, color: "#3730a3"}}>Your Rank</label>
+            <input type="number" min="1"
+              style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 8, padding: "8px 8px", marginTop: 5}}
+              value={rank} onChange={e => setRank(e.target.value)} required
+            />
           </div>
-          <div className="col-span-2 flex justify-center">
-            <button
-              type="submit"
-              className="w-full md:w-auto py-3 px-12 rounded-xl bg-gradient-to-r from-emerald-500 via-violet-500 to-pink-500 text-white font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition"
-            >
+          <div style={{gridColumn: "1 / span 2", textAlign: "center"}}>
+            <button type="submit" className="ct-btn">
               Find Eligible Colleges
             </button>
           </div>
         </form>
 
         {locked && !paid && (
-          <div className="flex flex-col items-center mt-10">
-            <div className="bg-pink-50 border border-pink-200 rounded-xl px-8 py-5 mb-3 text-pink-700 font-semibold text-2xl">
+          <div style={{textAlign: "center", marginTop: 36}}>
+            <div style={{background: "#fdf2f8", border: "1px solid #fbcfe8", borderRadius: 12, color: "#be185d", fontSize: 22, fontWeight: 700, padding: "20px 8px", marginBottom: 20}}>
               {eligibleCount} eligible college{eligibleCount !== 1 ? "s" : ""} found!
             </div>
-            <button
-              onClick={handlePayment}
-              className="py-3 px-12 rounded-xl bg-gradient-to-r from-pink-500 via-indigo-500 to-emerald-500 text-white text-xl font-bold shadow-lg hover:scale-105 active:scale-95 transition"
-            >
+            <button className="ct-btn" onClick={handlePayment}>
               Pay ₹10 & Unlock Details
             </button>
-            <p className="mt-2 text-xs text-indigo-400">One-time payment, unlock instantly!</p>
+            <div style={{marginTop: 8, color: "#818cf8", fontSize: 13}}>One-time payment, unlock instantly!</div>
           </div>
         )}
 
         {paid && groupedEligible && Object.keys(groupedEligible).length > 0 && (
-          <section className="mt-10">
-            <h2 className="text-2xl font-black text-violet-700 mb-6 text-center tracking-tight">
+          <section style={{marginTop: 36}}>
+            <h2 style={{fontSize: "2rem", fontWeight: 900, color: "#7c3aed", textAlign: "center", marginBottom: 30}}>
               Eligible Colleges (Grouped by Branch)
             </h2>
-            <div className="space-y-10">
+            <div>
               {Object.keys(groupedEligible).map(branchName => (
-                <div key={branchName} className="bg-white/90 rounded-2xl shadow border-2 border-emerald-100 px-4 py-6">
-                  <h3 className="text-xl font-bold text-emerald-600 mb-4 border-b border-emerald-200 pb-2">
-                    {branchName}
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-indigo-100 text-base">
-                      <thead className="bg-emerald-50">
+                <div key={branchName} className="branch-section">
+                  <div className="branch-title">{branchName}</div>
+                  <div style={{overflowX: "auto"}}>
+                    <table className="table-elig">
+                      <thead>
                         <tr>
-                          <th className="px-4 py-2 text-left font-semibold">College Code</th>
-                          <th className="px-4 py-2 text-left font-semibold">College Name</th>
-                          <th className="px-4 py-2 text-left font-semibold">Course</th>
-                          <th className="px-4 py-2 text-left font-semibold">Category</th>
-                          <th className="px-4 py-2 text-left font-semibold">Cutoff Rank</th>
+                          <th>College Code</th>
+                          <th>College Name</th>
+                          <th>Course</th>
+                          <th>Category</th>
+                          <th>Cutoff Rank</th>
                         </tr>
                       </thead>
                       <tbody>
                         {groupedEligible[branchName].map((col, idx) => (
-                          <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-emerald-50"}>
-                            <td className="px-4 py-2">{col.college_code}</td>
-                            <td className="px-4 py-2">{col.college_name}</td>
-                            <td className="px-4 py-2">{col.course}</td>
-                            <td className="px-4 py-2">{col.category}</td>
-                            <td className="px-4 py-2">{col.cutoff_rank}</td>
+                          <tr key={idx}>
+                            <td>{col.college_code}</td>
+                            <td>{col.college_name}</td>
+                            <td>{col.course}</td>
+                            <td>{col.category}</td>
+                            <td>{col.cutoff_rank}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -249,24 +245,14 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-4 justify-center mt-8">
-              <button
-                className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-indigo-700 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
-                onClick={handleDownloadCSV}
-              >
-                Download as CSV
-              </button>
-              <button
-                className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-rose-600 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
-                onClick={handleDownloadPDF}
-              >
-                Download as PDF
-              </button>
+            <div style={{display: "flex", gap: 22, justifyContent: "center", marginTop: 30}}>
+              <button className="ct-btn" onClick={handleDownloadCSV}>Download as CSV</button>
+              <button className="ct-btn" onClick={handleDownloadPDF}>Download as PDF</button>
             </div>
           </section>
         )}
       </main>
-      <footer className="mt-6 mb-2 text-center text-gray-400 text-xs">
+      <footer style={{margin: "24px 0 8px", color: "#818cf8", textAlign: "center", fontSize: 14}}>
         &copy; {new Date().getFullYear()} CET College Predictor
       </footer>
     </div>
