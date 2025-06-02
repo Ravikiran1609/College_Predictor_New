@@ -6,39 +6,46 @@ function AboutModal({ open, onClose }) {
   return (
     <div style={{
       position: "fixed", zIndex: 9999, top: 0, left: 0, width: "100vw", height: "100vh",
-      background: "rgba(0,0,0,0.34)", display: "flex", justifyContent: "center", alignItems: "center"
+      background: "rgba(48,19,69,0.24)", display: "flex", justifyContent: "center", alignItems: "center"
     }}>
       <div style={{
-        background: "#f0fdfa", maxWidth: 580, width: "95vw",
-        borderRadius: 20, boxShadow: "0 8px 32px #818cf880", padding: "36px 22px 30px 22px", position: "relative"
+        background: "#f8f6ff",
+        maxWidth: 580,
+        width: "95vw",
+        borderRadius: 22,
+        boxShadow: "0 12px 64px #6366f115",
+        padding: "40px 28px 34px 28px",
+        position: "relative",
+        border: "1.5px solid #d1d5db"
       }}>
         <button
           style={{
-            position: "absolute", right: 12, top: 12, fontSize: 26, color: "#7c3aed", background: "none",
-            border: "none", cursor: "pointer", fontWeight: 900
+            position: "absolute", right: 16, top: 12, fontSize: 32, color: "#7c3aed", background: "none",
+            border: "none", cursor: "pointer", fontWeight: 900, lineHeight: 1
           }}
           onClick={onClose}
           title="Close"
         >&times;</button>
         <h1 style={{
-          fontSize: "2rem", fontWeight: 800, color: "#6d28d9", marginBottom: 8, marginTop: 0
+          fontSize: "2rem", fontWeight: 900, color: "#7c3aed", marginBottom: 10, marginTop: 0, letterSpacing: "0.01em"
         }}>
           About Us
         </h1>
-        <p style={{ fontSize: 16, color: "#334155", marginBottom: 24 }}>
-          <strong>CET College Predictor</strong> is a simple, secure web platform designed to help students quickly discover which colleges they are eligible for, based on their CET rank and category.<br /><br />
-          <span style={{ color: "#059669" }}>This website is proudly owned and operated by <b>Flexiworks</b>.</span>
+        <p style={{ fontSize: 16.7, color: "#2d205b", marginBottom: 26 }}>
+          <strong>CET College Predictor</strong> is a vibrant, secure web platform designed to help students quickly discover which colleges they are eligible for, based on their CET rank and category.<br /><br />
+          <span style={{ color: "#06b06a", fontWeight: 600 }}>This website is proudly owned and operated by <b>Flexiworks</b>.</span>
         </p>
         <h2 style={{
-          fontSize: "1.13rem",
-          color: "#0ea5e9",
-          marginBottom: 8,
-          fontWeight: 700,
-          marginTop: 22
+          fontSize: "1.15rem",
+          color: "#4f46e5",
+          marginBottom: 9,
+          fontWeight: 800,
+          marginTop: 28,
+          letterSpacing: "0.01em"
         }}>
           User Guide
         </h2>
-        <ol style={{ color: "#334155", fontSize: 15, lineHeight: 1.56, paddingLeft: 24, marginBottom: 20 }}>
+        <ol style={{ color: "#2d205b", fontSize: 15.6, lineHeight: 1.68, paddingLeft: 24, marginBottom: 20 }}>
           <li><b>Select your Course and Category:</b><br />
             Use the dropdowns on the homepage to select your preferred course (like Engineering, Agriculture, etc.) and your reservation category (GM, SC, ST, etc.).
           </li>
@@ -55,11 +62,11 @@ function AboutModal({ open, onClose }) {
             After unlocking, download your personalized college list report in PDF or CSV format for future reference.
           </li>
         </ol>
-        <div style={{ color: "#9ca3af", fontSize: 13, marginTop: 20 }}>
+        <div style={{ color: "#7c3aed", fontSize: 13, marginTop: 24, fontWeight: 600 }}>
           <b>Note:</b> This predictor is based on the previous year's official CET cutoff data. Actual cutoffs and seat availability may vary for the current year.
         </div>
-        <div style={{ marginTop: 26, color: "#475569", fontSize: 14 }}>
-          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:info@flexiworks.in">info@flexiworks.in</a>
+        <div style={{ marginTop: 26, color: "#2d205b", fontSize: 14, fontWeight: 600 }}>
+          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:info@flexiworks.in" style={{color:"#0ea5e9", textDecoration:"underline"}}>info@flexiworks.in</a>
         </div>
       </div>
     </div>
@@ -154,7 +161,7 @@ export default function Home() {
         setGroupedEligible(data2.groupedEligible || {});
       },
       prefill: { name: "", email: "", contact: "" },
-      theme: { color: "#34d399" },
+      theme: { color: "#7c3aed" },
     };
     const rzp1 = new window.Razorpay(options);
     rzp1.open();
@@ -197,27 +204,63 @@ export default function Home() {
     link.remove();
   };
 
+  // Brand color palette
+  const violet = "#7c3aed";
+  const blue = "#6366f1";
+  const teal = "#06b06a";
+  const bg1 = "linear-gradient(90deg, #f5e6ff 0%, #f5fcff 100%)";
+  const bg2 = "linear-gradient(90deg, #f0abfc 0%, #a5b4fc 100%)";
+
   return (
-    <div>
+    <div style={{background: bg1, minHeight:"100vh"}}>
       {/* HEADER */}
-      <div className="header-gradient" style={{width: "100%", paddingTop: 32, paddingBottom: 32, marginBottom: -36}}>
-        <div style={{maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 28}}>
+      <div style={{
+        width: "100%",
+        paddingTop: 28,
+        paddingBottom: 28,
+        marginBottom: -36,
+        display: "flex",
+        justifyContent: "center",
+        background: "linear-gradient(90deg,#7c3aed 0,#f472b6 60%,#06b06a 100%)",
+        boxShadow: "0 4px 32px #bdb4fb24"
+      }}>
+        <div style={{
+          maxWidth: 940,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 26,
+          justifyContent: "center"
+        }}>
+          <img
+            src="/college-logo.png" // Use /public/college-logo.png
+            alt="College Hero"
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 13,
+              border: "2.5px solid #fff",
+              background: "#fff",
+              boxShadow: "0 1.5px 6px #fff8",
+              objectFit: "contain"
+            }}
+          />
           <div>
-            <img
-              src="/cc9830c7-27c0-4e42-931e-9e2e5681ab8f.png" // Place your image here in public/
-              alt="College Hero"
-              style={{width: 90, height: 90, borderRadius: 20, border: "4px solid #fff", background: "#fff", boxShadow: "0 4px 16px #fff8"}}
-            />
-          </div>
-          <div>
-            <h1 style={{fontSize: "2.7rem", fontWeight: 900, color: "#fff", margin: "0 0 7px"}}>CET College Predictor</h1>
+            <h1 style={{
+              fontSize: "2.3rem",
+              fontWeight: 900,
+              color: "#fff",
+              margin: "0 0 4px",
+              letterSpacing: "0.01em"
+            }}>
+              CET College Predictor
+            </h1>
             <p style={{
-              fontSize: 15,
-              color: "#3730a3", // now dark for contrast
-              margin: 0,
-              letterSpacing: "0.01em",
+              fontSize: 16.5,
+              color: "#292560",
+              margin: "0",
               fontWeight: 500,
-              whiteSpace: "nowrap"
+              letterSpacing: "0.01em"
             }}>
               Discover your college destiny. Unlock your best possibilities!
             </p>
@@ -228,22 +271,47 @@ export default function Home() {
               marginLeft: "auto",
               background: "rgba(255,255,255,0.13)",
               color: "#fff",
-              fontSize: "1rem",
-              padding: "8px 18px",
-              borderRadius: 8,
+              fontSize: "1.05rem",
+              padding: "9px 20px",
+              borderRadius: 10,
               border: "none",
               cursor: "pointer",
-              fontWeight: 500,
-              boxShadow: "0 1px 6px #7c3aed30"
+              fontWeight: 700,
+              boxShadow: "0 1px 8px #7c3aed30",
+              transition: "all .14s",
+              outline: "none"
             }}
+            onMouseOver={e => e.target.style.background="#ede9fe"}
+            onMouseOut={e => e.target.style.background="rgba(255,255,255,0.13)"}
           >
             About Us / User Guide
           </button>
         </div>
       </div>
 
-      <main className="ct-main-card">
-        <div className="note-alert">
+      <main style={{
+        maxWidth: 900,
+        margin: "0 auto",
+        borderRadius: 30,
+        boxShadow: "0 10px 32px #7c3aed14",
+        border: "1.7px solid #e9d5ff",
+        marginTop: -40,
+        marginBottom: 32,
+        padding: "42px 32px",
+        background: "rgba(255,255,255,0.96)",
+        backdropFilter: "blur(7px)"
+      }}>
+        <div style={{
+          background: "#e0e7ff",
+          color: "#4f46e5",
+          border: "1.4px solid #a5b4fc",
+          padding: 16,
+          borderRadius: 15,
+          textAlign: "center",
+          marginBottom: 30,
+          fontSize: "1.09rem",
+          fontWeight: 500
+        }}>
           Prediction is purely based on previous year cutoff. It may vary for present year.
         </div>
 
@@ -255,12 +323,12 @@ export default function Home() {
 
         {/* FORM */}
         <form
-          style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20}}
+          style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20}}
           onSubmit={e => { e.preventDefault(); handlePredict(); }}
         >
           <div>
-            <label style={{fontWeight: 600, color: "#3730a3"}}>Course</label>
-            <select style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 8, padding: "8px 8px", marginTop: 5}} value={course} onChange={e => setCourse(e.target.value)} required>
+            <label style={{fontWeight: 700, color: "#4f46e5"}}>Course</label>
+            <select style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9, padding: "10px 8px", marginTop: 5}} value={course} onChange={e => setCourse(e.target.value)} required>
               <option value="">Select Course</option>
               {courses.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -268,8 +336,8 @@ export default function Home() {
             </select>
           </div>
           <div>
-            <label style={{fontWeight: 600, color: "#059669"}}>Category</label>
-            <select style={{width: "100%", fontSize: 17, border: "2px solid #bbf7d0", borderRadius: 8, padding: "8px 8px", marginTop: 5}} value={category} onChange={e => setCategory(e.target.value)} required>
+            <label style={{fontWeight: 700, color: "#06b06a"}}>Category</label>
+            <select style={{width: "100%", fontSize: 17, border: "2px solid #bbf7d0", borderRadius: 9, padding: "10px 8px", marginTop: 5}} value={category} onChange={e => setCategory(e.target.value)} required>
               <option value="">Select Category</option>
               {categories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -277,25 +345,69 @@ export default function Home() {
             </select>
           </div>
           <div style={{gridColumn: "1 / span 2"}}>
-            <label style={{fontWeight: 600, color: "#3730a3"}}>Your Rank</label>
+            <label style={{fontWeight: 700, color: "#4f46e5"}}>Your Rank</label>
             <input type="number" min="1"
-              style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 8, padding: "8px 8px", marginTop: 5}}
+              style={{width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9, padding: "10px 8px", marginTop: 5}}
               value={rank} onChange={e => setRank(e.target.value)} required
             />
           </div>
           <div style={{gridColumn: "1 / span 2", textAlign: "center"}}>
-            <button type="submit" className="ct-btn">
+            <button
+              type="submit"
+              className="ct-btn"
+              style={{
+                display: "inline-block",
+                background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)",
+                color: "#fff",
+                fontWeight: "bold",
+                padding: "15px 40px",
+                borderRadius: 999,
+                fontSize: "1.18rem",
+                border: "none",
+                boxShadow: "0 2px 14px #7c3aed30",
+                margin: "12px 0 6px",
+                cursor: "pointer",
+                transition: "transform .12s, box-shadow .12s"
+              }}
+              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.boxShadow = "0 6px 18px #a7f3d040"; }}
+              onMouseOut={e => { e.target.style.transform = "scale(1)"; e.target.style.boxShadow = "0 2px 14px #7c3aed30"; }}
+            >
               Find Eligible Colleges
             </button>
           </div>
         </form>
 
         {locked && !paid && (
-          <div style={{textAlign: "center", marginTop: 36}}>
-            <div style={{background: "#fdf2f8", border: "1px solid #fbcfe8", borderRadius: 12, color: "#be185d", fontSize: 22, fontWeight: 700, padding: "20px 8px", marginBottom: 20}}>
+          <div style={{textAlign: "center", marginTop: 38}}>
+            <div style={{
+              background: "#fdf2f8",
+              border: "1.3px solid #fbcfe8",
+              borderRadius: 14,
+              color: "#be185d",
+              fontSize: 24,
+              fontWeight: 800,
+              padding: "24px 8px",
+              marginBottom: 20
+            }}>
               {eligibleCount} eligible college{eligibleCount !== 1 ? "s" : ""} found!
             </div>
-            <button className="ct-btn" onClick={handlePayment}>
+            <button className="ct-btn" onClick={handlePayment}
+              style={{
+                background: "linear-gradient(90deg, #f472b6 0%, #06b06a 100%)",
+                fontWeight: 700,
+                fontSize: "1.14rem",
+                padding: "13px 34px",
+                borderRadius: 999,
+                border: "none",
+                color: "#fff",
+                boxShadow: "0 2px 10px #7c3aed15",
+                cursor: "pointer",
+                marginTop: 0,
+                transition: "all .13s"
+              }}
+              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
+              onMouseOut={e => { e.target.style.transform = "scale(1)"; e.target.style.background = "linear-gradient(90deg, #f472b6 0%, #06b06a 100%)"; }}
+            >
               Pay ₹10 & Unlock Details
             </button>
             <div style={{marginTop: 8, color: "#818cf8", fontSize: 13}}>One-time payment, unlock instantly!</div>
@@ -309,27 +421,46 @@ export default function Home() {
             </h2>
             <div>
               {Object.keys(groupedEligible).map(branchName => (
-                <div key={branchName} className="branch-section">
-                  <div className="branch-title">{branchName}</div>
+                <div key={branchName} className="branch-section" style={{
+                  background: "#f8fafc",
+                  borderRadius: 15,
+                  border: "2px solid #a7f3d0",
+                  marginBottom: 38,
+                  boxShadow: "0 2px 8px 0 #e0e7ff25",
+                  padding: "30px 12px"
+                }}>
+                  <div className="branch-title" style={{
+                    fontSize: "1.25rem",
+                    fontWeight: 800,
+                    color: "#06b06a",
+                    borderBottom: "2px solid #6ee7b7",
+                    paddingBottom: 7,
+                    marginBottom: 22
+                  }}>{branchName}</div>
                   <div style={{overflowX: "auto"}}>
-                    <table className="table-elig">
+                    <table className="table-elig" style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      background: "#f0fdfa",
+                      fontSize: "1rem"
+                    }}>
                       <thead>
                         <tr>
-                          <th>College Code</th>
-                          <th>College Name</th>
-                          <th>Course</th>
-                          <th>Category</th>
-                          <th>Cutoff Rank</th>
+                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>College Code</th>
+                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>College Name</th>
+                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Course</th>
+                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Category</th>
+                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Cutoff Rank</th>
                         </tr>
                       </thead>
                       <tbody>
                         {groupedEligible[branchName].map((col, idx) => (
-                          <tr key={idx}>
-                            <td>{col.college_code}</td>
-                            <td>{col.college_name}</td>
-                            <td>{col.course}</td>
-                            <td>{col.category}</td>
-                            <td>{col.cutoff_rank}</td>
+                          <tr key={idx} style={{background: idx%2 ? "#f0fdfa" : "#fff"}}>
+                            <td style={{padding:"9px 12px"}}>{col.college_code}</td>
+                            <td style={{padding:"9px 12px"}}>{col.college_name}</td>
+                            <td style={{padding:"9px 12px"}}>{col.course}</td>
+                            <td style={{padding:"9px 12px"}}>{col.category}</td>
+                            <td style={{padding:"9px 12px"}}>{col.cutoff_rank}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -338,17 +469,49 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div style={{display: "flex", gap: 22, justifyContent: "center", marginTop: 30}}>
-              <button className="ct-btn" onClick={handleDownloadCSV}>Download as CSV</button>
-              <button className="ct-btn" onClick={handleDownloadPDF}>Download as PDF</button>
+            <div style={{display: "flex", gap: 22, justifyContent: "center", marginTop: 28}}>
+              <button className="ct-btn" onClick={handleDownloadCSV}
+                style={{
+                  background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)",
+                  color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
+                  padding: "13px 32px", fontSize: "1.09rem", boxShadow: "0 1px 6px #7c3aed24",
+                  cursor: "pointer",
+                  transition: "all .13s"
+                }}
+                onMouseOver={e => { e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
+                onMouseOut={e => { e.target.style.background = "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)"; }}
+              >
+                Download as CSV
+              </button>
+              <button className="ct-btn" onClick={handleDownloadPDF}
+                style={{
+                  background: "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)",
+                  color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
+                  padding: "13px 32px", fontSize: "1.09rem", boxShadow: "0 1px 6px #7c3aed24",
+                  cursor: "pointer",
+                  transition: "all .13s"
+                }}
+                onMouseOver={e => { e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
+                onMouseOut={e => { e.target.style.background = "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)"; }}
+              >
+                Download as PDF
+              </button>
             </div>
           </section>
         )}
       </main>
-      <footer style={{margin: "24px 0 8px", color: "#818cf8", textAlign: "center", fontSize: 14}}>
+      <footer style={{
+        margin: "24px 0 8px",
+        color: "#7c3aed",
+        textAlign: "center",
+        fontSize: 15.5,
+        fontWeight: 600,
+        letterSpacing: ".015em"
+      }}>
         &copy; {new Date().getFullYear()} CET College Predictor &nbsp; | &nbsp;
         <button style={{
-          color:'#6366f1', background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: 14, padding: 0
+          color:'#0ea5e9', background: "none", border: "none", cursor: "pointer",
+          textDecoration: "underline", fontSize: 15.5, padding: 0, fontWeight:600
         }} onClick={() => setAboutOpen(true)}>
           About Us
         </button>
