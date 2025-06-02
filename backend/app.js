@@ -24,11 +24,20 @@ const razorpay = new Razorpay({
   key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
 });
 
+// Helper for robust branch matching
+const branchMatch = (recBranch, branchValue) => {
+  return (
+    !branchValue ||
+    branchValue.trim() === "" ||
+    (recBranch && recBranch.trim().toLowerCase() === branchValue.trim().toLowerCase())
+  );
+};
+
 // Dropdown options
 app.get("/api/options", (req, res) => {
-  const courses = [...new Set(records.map(r => r.course))].sort();
-  const categories = [...new Set(records.map(r => r.category))].sort();
-  const branches = [...new Set(records.map(r => r.branch))].sort();
+  const courses = [...new Set(records.map(r => r.course.trim()))].sort();
+  const categories = [...new Set(records.map(r => r.category.trim()))].sort();
+  const branches = [...new Set(records.map(r => r.branch.trim()))].sort();
   res.json({ courses, categories, branches });
 });
 
@@ -37,16 +46,13 @@ app.post("/api/predict", (req, res) => {
   const { course, category, branch, rank } = req.body;
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
 
-  // Helper: true if "all branches" or matches selected branch
-  const branchMatch = (recBranch) => {
-    return !branch || branch.trim() === "" || recBranch === branch;
-  };
-
   const result = records.filter(
     (r) =>
-      r.course.toLowerCase() === course.toLowerCase() &&
-      r.category.toLowerCase() === category.toLowerCase() &&
-      branchMatch(r.branch) &&
+      r.course && course &&
+      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
+      r.category && category &&
+      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      branchMatch(r.branch, branch) &&
       parseInt(rank) <= parseInt(r.cutoff_rank)
   );
   res.json({ eligibleCount: result.length, locked: true });
@@ -81,17 +87,14 @@ app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
   const userRank = parseInt(rank);
 
-  // Helper: true if "all branches" or matches selected branch
-  const branchMatch = (recBranch) => {
-    return !branch || branch.trim() === "" || recBranch === branch;
-  };
-
   // Eligible: userRank <= cutoff_rank
   let eligible = records.filter(
     (r) =>
-      r.course.toLowerCase() === course.toLowerCase() &&
-      r.category.toLowerCase() === category.toLowerCase() &&
-      branchMatch(r.branch) &&
+      r.course && course &&
+      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
+      r.category && category &&
+      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      branchMatch(r.branch, branch) &&
       userRank <= parseInt(r.cutoff_rank)
   );
   eligible = eligible.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
@@ -99,15 +102,21 @@ app.post("/api/unlock", (req, res) => {
   // Near miss: cutoff_rank < userRank && cutoff_rank >= userRank - 2000
   let nearMiss = records.filter(
     (r) =>
-      r.course.toLowerCase() === course.toLowerCase() &&
-      r.category.toLowerCase() === category.toLowerCase() &&
-      branchMatch(r.branch) &&
+      r.course && course &&
+      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
+      r.category && category &&
+      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      branchMatch(r.branch, branch) &&
       parseInt(r.cutoff_rank) < userRank &&
       parseInt(r.cutoff_rank) >= userRank - 2000
   );
   // Remove any possible overlap
   nearMiss = nearMiss.filter(
-    (r) => !eligible.some(e => e.college_code === r.college_code && e.branch === r.branch && e.cutoff_rank === r.cutoff_rank)
+    (r) => !eligible.some(e =>
+      e.college_code === r.college_code &&
+      e.branch && r.branch && e.branch.trim().toLowerCase() === r.branch.trim().toLowerCase() &&
+      e.cutoff_rank === r.cutoff_rank
+    )
   );
   nearMiss = nearMiss.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
 
