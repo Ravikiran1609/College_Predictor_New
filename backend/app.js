@@ -36,11 +36,17 @@ app.get("/api/options", (req, res) => {
 app.post("/api/predict", (req, res) => {
   const { course, category, branch, rank } = req.body;
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
+
+  // Helper: true if "all branches" or matches selected branch
+  const branchMatch = (recBranch) => {
+    return !branch || branch.trim() === "" || recBranch === branch;
+  };
+
   const result = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
-      (!branch || r.branch === branch) &&
+      branchMatch(r.branch) &&
       parseInt(rank) <= parseInt(r.cutoff_rank)
   );
   res.json({ eligibleCount: result.length, locked: true });
@@ -70,17 +76,22 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// Unlock after payment: return eligible + near miss colleges
+// Unlock after payment: return eligible + near miss colleges (for ALL branches if none selected)
 app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
   const userRank = parseInt(rank);
+
+  // Helper: true if "all branches" or matches selected branch
+  const branchMatch = (recBranch) => {
+    return !branch || branch.trim() === "" || recBranch === branch;
+  };
 
   // Eligible: userRank <= cutoff_rank
   let eligible = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
-      (!branch || r.branch === branch) &&
+      branchMatch(r.branch) &&
       userRank <= parseInt(r.cutoff_rank)
   );
   eligible = eligible.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
@@ -90,7 +101,7 @@ app.post("/api/unlock", (req, res) => {
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
-      (!branch || r.branch === branch) &&
+      branchMatch(r.branch) &&
       parseInt(r.cutoff_rank) < userRank &&
       parseInt(r.cutoff_rank) >= userRank - 2000
   );
