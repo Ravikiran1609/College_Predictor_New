@@ -258,4 +258,8 @@ export default function Home() {
     </div>
   );
 }
+<footer style={{margin: "24px 0 8px", color: "#818cf8", textAlign: "center", fontSize: 14}}>
+  &copy; {new Date().getFullYear()} CET College Predictor &nbsp; | &nbsp;
+  <a href="/about" style={{color:'#6366f1'}}>About Us</a>
+</footer>
 
