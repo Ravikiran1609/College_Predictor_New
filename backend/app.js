@@ -4,6 +4,7 @@ const fs = require("fs");
 const csv = require("csv-parser");
 const Razorpay = require("razorpay");
 const bodyParser = require("body-parser");
+const PDFDocument = require("pdfkit");
 
 const app = express();
 app.use(cors());
@@ -20,8 +21,8 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_SmAPbhfUjKXBRl",
-  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
+  key_id: "rzp_test_xxxxxxxxxxxx",
+  key_secret: "xxxxxxxxxxxxxxxxxxxx",
 });
 
 // Helper for robust branch matching
@@ -124,6 +125,54 @@ app.post("/api/unlock", (req, res) => {
     eligibleColleges: eligible,
     nearMissColleges: nearMiss,
   });
+});
+
+// ======= PDF REPORT ENDPOINT ======= //
+app.post("/api/generate-pdf", (req, res) => {
+  const { eligibleColleges, nearMissColleges } = req.body;
+
+  // Setup PDF
+  const doc = new PDFDocument({ margin: 30, size: "A4" });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", 'attachment; filename="college_report.pdf"');
+
+  doc.pipe(res);
+
+  doc.fontSize(18).text("CET College Predictor Report", { align: "center" });
+  doc.moveDown();
+
+  // Eligible Colleges
+  doc.fontSize(14).fillColor("green").text("Eligible Colleges:", { underline: true });
+  doc.moveDown(0.5);
+
+  if (eligibleColleges && eligibleColleges.length > 0) {
+    eligibleColleges.forEach((col, idx) => {
+      doc.fontSize(11).fillColor("black").text(
+        `${idx + 1}. ${col.college_name} (${col.college_code}) | Branch: ${col.branch} | Course: ${col.course} | Category: ${col.category} | Cutoff Rank: ${col.cutoff_rank}`
+      );
+    });
+  } else {
+    doc.fontSize(11).fillColor("black").text("No eligible colleges found.");
+  }
+
+  doc.moveDown();
+
+  // Near Miss Colleges
+  doc.fontSize(14).fillColor("#cc205f").text("Near Miss Colleges (within 2000 ranks better):", { underline: true });
+  doc.moveDown(0.5);
+
+  if (nearMissColleges && nearMissColleges.length > 0) {
+    nearMissColleges.forEach((col, idx) => {
+      doc.fontSize(11).fillColor("black").text(
+        `${idx + 1}. ${col.college_name} (${col.college_code}) | Branch: ${col.branch} | Course: ${col.course} | Category: ${col.category} | Cutoff Rank: ${col.cutoff_rank}`
+      );
+    });
+  } else {
+    doc.fontSize(11).fillColor("black").text("No near miss colleges.");
+  }
+
+  doc.end();
 });
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

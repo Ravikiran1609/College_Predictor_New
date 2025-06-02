@@ -77,7 +77,7 @@ export default function Home() {
     const order = await res.json();
 
     const options = {
-      key: "rzp_test_SmAPbhfUjKXBRl", // <-- Your Razorpay test key
+      key: "rzp_test_xxxxxxxxxxxx", // <-- Your Razorpay test key
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",
@@ -101,13 +101,56 @@ export default function Home() {
     rzp1.open();
   };
 
+  const handleDownloadCSV = () => {
+    const csv = [
+      ...(eligibleColleges.length > 0
+        ? [
+            "Eligible Colleges:",
+            Object.keys(eligibleColleges[0]).join(","),
+            ...eligibleColleges.map(r => Object.values(r).join(",")),
+          ]
+        : []),
+      "",
+      ...(nearMissColleges.length > 0
+        ? [
+            "Near Miss Colleges:",
+            Object.keys(nearMissColleges[0]).join(","),
+            ...nearMissColleges.map(r => Object.values(r).join(",")),
+          ]
+        : []),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "eligible_colleges.csv";
+    link.click();
+  };
+
+  const handleDownloadPDF = async () => {
+    const response = await fetch("/api/generate-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eligibleColleges, nearMissColleges }),
+    });
+    if (!response.ok) {
+      alert("Failed to generate PDF report. Please try again!");
+      return;
+    }
+    const blob = await response.blob();
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "college_report.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-pink-50 to-emerald-100 flex flex-col items-center px-2">
-      {/* HERO SECTION */}
+      {/* HEADER */}
       <header className="w-full flex flex-col items-center py-12 px-3 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-400 shadow-lg mb-[-56px] relative z-10">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div>
-            {/* You can replace this image with your own logo or hero visual */}
             <img
               src="https://cdn.pixabay.com/photo/2016/10/28/22/03/book-1780453_1280.png"
               alt="College Hero"
@@ -255,34 +298,18 @@ export default function Home() {
             )}
 
             {(eligibleColleges.length > 0 || nearMissColleges.length > 0) && (
-              <div className="flex justify-center">
+              <div className="flex gap-4 justify-center">
                 <button
-                  className="mt-2 py-2 px-10 rounded-2xl bg-gradient-to-r from-indigo-700 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
-                  onClick={() => {
-                    const csv = [
-                      ...(eligibleColleges.length > 0
-                        ? [
-                            "Eligible Colleges:",
-                            Object.keys(eligibleColleges[0]).join(","),
-                            ...eligibleColleges.map(r => Object.values(r).join(",")),
-                          ]
-                        : []),
-                      "",
-                      ...(nearMissColleges.length > 0
-                        ? [
-                            "Near Miss Colleges:",
-                            Object.keys(nearMissColleges[0]).join(","),
-                            ...nearMissColleges.map(r => Object.values(r).join(",")),
-                          ]
-                        : []),
-                    ].join("\n");
-                    const blob = new Blob([csv], { type: "text/csv" });
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = "eligible_colleges.csv";
-                    link.click();
-                  }}>
+                  className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-indigo-700 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
+                  onClick={handleDownloadCSV}
+                >
                   Download as CSV
+                </button>
+                <button
+                  className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-rose-600 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
+                  onClick={handleDownloadPDF}
+                >
+                  Download as PDF
                 </button>
               </div>
             )}
