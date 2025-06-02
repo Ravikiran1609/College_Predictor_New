@@ -255,15 +255,6 @@ export default function Home() {
             }}>
               CET College Predictor
             </h1>
-            <p style={{
-              fontSize: 16.5,
-              color: "#292560",
-              margin: "0",
-              fontWeight: 500,
-              letterSpacing: "0.01em"
-            }}>
-              Discover your college destiny. Unlock your best possibilities!
-            </p>
           </div>
           <button
             onClick={() => setAboutOpen(true)}
