@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-function toTitle(str) {
-  return str.replace(/\b\w/g, l => l.toUpperCase());
-}
-
 export default function Home() {
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
@@ -19,7 +15,7 @@ export default function Home() {
   const [paid, setPaid] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const apiURL = ""; // Leave blank if using reverse proxy/docker nginx
+  const apiURL = ""; // leave blank for same domain/reverse-proxy, or set to your backend URL
 
   useEffect(() => {
     fetch(`${apiURL}/api/options`)
@@ -81,7 +77,7 @@ export default function Home() {
     const order = await res.json();
 
     const options = {
-      key: "rzp_test_SmAPbhfUjKXBRl", // <-- Your Razorpay test key
+      key: "rzp_test_xxxxxxxxxxxx", // <-- Your Razorpay test key
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",
@@ -188,7 +184,7 @@ export default function Home() {
             <select className="w-full border-2 border-indigo-200 rounded-lg px-4 py-2 mt-1 bg-white" value={course} onChange={e => setCourse(e.target.value)} required>
               <option value="">Select Course</option>
               {courses.map(c => (
-                <option key={c} value={c}>{toTitle(c)}</option>
+                <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
@@ -197,7 +193,7 @@ export default function Home() {
             <select className="w-full border-2 border-emerald-200 rounded-lg px-4 py-2 mt-1 bg-white" value={category} onChange={e => setCategory(e.target.value)} required>
               <option value="">Select Category</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat.toUpperCase()}</option>
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
@@ -206,7 +202,7 @@ export default function Home() {
             <select className="w-full border-2 border-pink-200 rounded-lg px-4 py-2 mt-1 bg-white" value={branch} onChange={e => setBranch(e.target.value)}>
               <option value="">All Branches</option>
               {branches.map(b => (
-                <option key={b} value={b}>{toTitle(b)}</option>
+                <option key={b} value={b}>{b}</option>
               ))}
             </select>
           </div>

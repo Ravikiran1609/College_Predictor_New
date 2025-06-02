@@ -12,7 +12,16 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Load CSV into memory
+// Helper: normalized string
+function norm(str) {
+  return (str || "").trim().toLowerCase();
+}
+
+function branchMatch(rowBranch, userBranch) {
+  if (!userBranch || userBranch.trim() === "") return true; // all branches
+  return norm(rowBranch) === norm(userBranch);
+}
+
 let records = [];
 fs.createReadStream("Final_Data.csv")
   .pipe(csv())
@@ -25,27 +34,15 @@ const razorpay = new Razorpay({
   key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
 });
 
-// Helper for robust normalized string match
-function norm(str) {
-  return (str || "").trim().toLowerCase();
-}
-
-// Helper for robust branch matching
-function branchMatch(rowBranch, userBranch) {
-  // If user branch is empty, match all branches.
-  if (!userBranch || userBranch.trim() === "") return true;
-  return norm(rowBranch) === norm(userBranch);
-}
-
-// Dropdown options
+// For dropdowns: always return the ACTUAL CSV values
 app.get("/api/options", (req, res) => {
-  const courses = [...new Set(records.map(r => norm(r.course)))].filter(Boolean).sort();
-  const categories = [...new Set(records.map(r => norm(r.category)))].filter(Boolean).sort();
-  const branches = [...new Set(records.map(r => norm(r.branch)))].filter(Boolean).sort();
+  const courses = [...new Set(records.map(r => (r.course || "").trim()))].filter(Boolean).sort();
+  const categories = [...new Set(records.map(r => (r.category || "").trim()))].filter(Boolean).sort();
+  const branches = [...new Set(records.map(r => (r.branch || "").trim()))].filter(Boolean).sort();
   res.json({ courses, categories, branches });
 });
 
-// Eligibility prediction (count only)
+// Eligibility prediction
 app.post("/api/predict", (req, res) => {
   const { course, category, branch, rank } = req.body;
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
@@ -84,7 +81,7 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// Unlock after payment: return eligible + near miss colleges
+// Main eligibility logic
 app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
   const userRank = parseInt(rank);
@@ -108,7 +105,6 @@ app.post("/api/unlock", (req, res) => {
       parseInt(r.cutoff_rank) < userRank &&
       parseInt(r.cutoff_rank) >= userRank - 2000
   );
-  // Remove any possible overlap
   nearMiss = nearMiss.filter(
     (r) => !eligible.some(e =>
       norm(e.college_code) === norm(r.college_code) &&
@@ -127,13 +123,10 @@ app.post("/api/unlock", (req, res) => {
 // ======= PDF REPORT ENDPOINT ======= //
 app.post("/api/generate-pdf", (req, res) => {
   const { eligibleColleges, nearMissColleges } = req.body;
-
-  // Setup PDF
   const doc = new PDFDocument({ margin: 30, size: "A4" });
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", 'attachment; filename="college_report.pdf"');
-
   doc.pipe(res);
 
   doc.fontSize(18).text("CET College Predictor Report", { align: "center" });
