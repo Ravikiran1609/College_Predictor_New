@@ -25,20 +25,23 @@ const razorpay = new Razorpay({
   key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
 });
 
+// Helper for robust normalized string match
+function norm(str) {
+  return (str || "").trim().toLowerCase();
+}
+
 // Helper for robust branch matching
-const branchMatch = (recBranch, branchValue) => {
-  return (
-    !branchValue ||
-    branchValue.trim() === "" ||
-    (recBranch && recBranch.trim().toLowerCase() === branchValue.trim().toLowerCase())
-  );
-};
+function branchMatch(rowBranch, userBranch) {
+  // If user branch is empty, match all branches.
+  if (!userBranch || userBranch.trim() === "") return true;
+  return norm(rowBranch) === norm(userBranch);
+}
 
 // Dropdown options
 app.get("/api/options", (req, res) => {
-  const courses = [...new Set(records.map(r => r.course.trim()))].sort();
-  const categories = [...new Set(records.map(r => r.category.trim()))].sort();
-  const branches = [...new Set(records.map(r => r.branch.trim()))].sort();
+  const courses = [...new Set(records.map(r => norm(r.course)))].filter(Boolean).sort();
+  const categories = [...new Set(records.map(r => norm(r.category)))].filter(Boolean).sort();
+  const branches = [...new Set(records.map(r => norm(r.branch)))].filter(Boolean).sort();
   res.json({ courses, categories, branches });
 });
 
@@ -49,10 +52,8 @@ app.post("/api/predict", (req, res) => {
 
   const result = records.filter(
     (r) =>
-      r.course && course &&
-      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
-      r.category && category &&
-      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      norm(r.course) === norm(course) &&
+      norm(r.category) === norm(category) &&
       branchMatch(r.branch, branch) &&
       parseInt(rank) <= parseInt(r.cutoff_rank)
   );
@@ -83,7 +84,7 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// Unlock after payment: return eligible + near miss colleges (for ALL branches if none selected)
+// Unlock after payment: return eligible + near miss colleges
 app.post("/api/unlock", (req, res) => {
   const { course, category, branch, rank } = req.body;
   const userRank = parseInt(rank);
@@ -91,10 +92,8 @@ app.post("/api/unlock", (req, res) => {
   // Eligible: userRank <= cutoff_rank
   let eligible = records.filter(
     (r) =>
-      r.course && course &&
-      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
-      r.category && category &&
-      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      norm(r.course) === norm(course) &&
+      norm(r.category) === norm(category) &&
       branchMatch(r.branch, branch) &&
       userRank <= parseInt(r.cutoff_rank)
   );
@@ -103,10 +102,8 @@ app.post("/api/unlock", (req, res) => {
   // Near miss: cutoff_rank < userRank && cutoff_rank >= userRank - 2000
   let nearMiss = records.filter(
     (r) =>
-      r.course && course &&
-      r.course.trim().toLowerCase() === course.trim().toLowerCase() &&
-      r.category && category &&
-      r.category.trim().toLowerCase() === category.trim().toLowerCase() &&
+      norm(r.course) === norm(course) &&
+      norm(r.category) === norm(category) &&
       branchMatch(r.branch, branch) &&
       parseInt(r.cutoff_rank) < userRank &&
       parseInt(r.cutoff_rank) >= userRank - 2000
@@ -114,9 +111,9 @@ app.post("/api/unlock", (req, res) => {
   // Remove any possible overlap
   nearMiss = nearMiss.filter(
     (r) => !eligible.some(e =>
-      e.college_code === r.college_code &&
-      e.branch && r.branch && e.branch.trim().toLowerCase() === r.branch.trim().toLowerCase() &&
-      e.cutoff_rank === r.cutoff_rank
+      norm(e.college_code) === norm(r.college_code) &&
+      norm(e.branch) === norm(r.branch) &&
+      String(e.cutoff_rank) === String(r.cutoff_rank)
     )
   );
   nearMiss = nearMiss.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
