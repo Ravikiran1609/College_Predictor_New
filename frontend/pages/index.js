@@ -39,19 +39,19 @@ function AboutModal({ open, onClose }) {
           User Guide
         </h2>
         <ol style={{ color: "#334155", fontSize: 15, lineHeight: 1.56, paddingLeft: 24, marginBottom: 20 }}>
-          <li><b>1. Select your Course and Category:</b><br />
+          <li><b>Select your Course and Category:</b><br />
             Use the dropdowns on the homepage to select your preferred course (like Engineering, Agriculture, etc.) and your reservation category (GM, SC, ST, etc.).
           </li>
-          <li><b>2. Enter your CET Rank:</b><br />
+          <li><b>Enter your CET Rank:</b><br />
             Type your CET rank in the provided box.
           </li>
-          <li><b>3. Find Eligible Colleges:</b><br />
+          <li><b>Find Eligible Colleges:</b><br />
             Click on <b>Find Eligible Colleges</b> to see how many colleges you are eligible for, grouped by branch.
           </li>
-          <li><b>4. Unlock Full List & Download:</b><br />
+          <li><b>Unlock Full List & Download:</b><br />
             Pay a small, secure fee (₹10 via Razorpay) to instantly view the detailed list and download your result as a PDF or CSV file.
           </li>
-          <li><b>5. Download or Print:</b><br />
+          <li><b>Download or Print:</b><br />
             After unlocking, download your personalized college list report in PDF or CSV format for future reference.
           </li>
         </ol>
@@ -204,7 +204,7 @@ export default function Home() {
         <div style={{maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", gap: 28}}>
           <div>
             <img
-              src="https://cdn.pixabay.com/photo/2016/10/28/22/03/book-1780453_1280.png"
+              src="/cc9830c7-27c0-4e42-931e-9e2e5681ab8f.png" // Place your image here in public/
               alt="College Hero"
               style={{width: 90, height: 90, borderRadius: 20, border: "4px solid #fff", background: "#fff", boxShadow: "0 4px 16px #fff8"}}
             />
@@ -213,10 +213,10 @@ export default function Home() {
             <h1 style={{fontSize: "2.7rem", fontWeight: 900, color: "#fff", margin: "0 0 7px"}}>CET College Predictor</h1>
             <p style={{
               fontSize: 15,
-              color: "#f0f9ff",
+              color: "#3730a3", // now dark for contrast
               margin: 0,
               letterSpacing: "0.01em",
-              fontWeight: 400,
+              fontWeight: 500,
               whiteSpace: "nowrap"
             }}>
               Discover your college destiny. Unlock your best possibilities!
