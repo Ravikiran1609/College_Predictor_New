@@ -3,19 +3,16 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
-  const [branch, setBranch] = useState("");
   const [rank, setRank] = useState("");
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [branches, setBranches] = useState([]);
   const [locked, setLocked] = useState(false);
   const [eligibleCount, setEligibleCount] = useState(0);
-  const [eligibleColleges, setEligibleColleges] = useState([]);
-  const [nearMissColleges, setNearMissColleges] = useState([]);
+  const [groupedEligible, setGroupedEligible] = useState({});
   const [paid, setPaid] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const apiURL = ""; // leave blank for same domain/reverse-proxy, or set to your backend URL
+  const apiURL = ""; // blank for reverse proxy; or your backend URL
 
   useEffect(() => {
     fetch(`${apiURL}/api/options`)
@@ -23,7 +20,6 @@ export default function Home() {
       .then(data => {
         setCourses(data.courses || []);
         setCategories(data.categories || []);
-        setBranches(data.branches || []);
       });
   }, []);
 
@@ -41,12 +37,11 @@ export default function Home() {
     setLocked(false);
     setPaid(false);
     setEligibleCount(0);
-    setEligibleColleges([]);
-    setNearMissColleges([]);
+    setGroupedEligible({});
     const res = await fetch(`${apiURL}/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course, category, branch, rank }),
+      body: JSON.stringify({ course, category, rank }),
     });
     const data = await res.json();
     if (data.error) {
@@ -65,9 +60,7 @@ export default function Home() {
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.async = true;
       document.body.appendChild(script);
-      await new Promise((resolve) => {
-        script.onload = resolve;
-      });
+      await new Promise((resolve) => { script.onload = resolve; });
     }
     const res = await fetch(`${apiURL}/api/create-order`, {
       method: "POST",
@@ -88,11 +81,10 @@ export default function Home() {
         const res2 = await fetch(`${apiURL}/api/unlock`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ course, category, branch, rank }),
+          body: JSON.stringify({ course, category, rank }),
         });
         const data2 = await res2.json();
-        setEligibleColleges(data2.eligibleColleges || []);
-        setNearMissColleges(data2.nearMissColleges || []);
+        setGroupedEligible(data2.groupedEligible || {});
       },
       prefill: { name: "", email: "", contact: "" },
       theme: { color: "#34d399" },
@@ -102,27 +94,20 @@ export default function Home() {
   };
 
   const handleDownloadCSV = () => {
-    const csv = [
-      ...(eligibleColleges.length > 0
-        ? [
-            "Eligible Colleges:",
-            Object.keys(eligibleColleges[0]).join(","),
-            ...eligibleColleges.map(r => Object.values(r).join(",")),
-          ]
-        : []),
-      "",
-      ...(nearMissColleges.length > 0
-        ? [
-            "Near Miss Colleges:",
-            Object.keys(nearMissColleges[0]).join(","),
-            ...nearMissColleges.map(r => Object.values(r).join(",")),
-          ]
-        : []),
-    ].join("\n");
+    let csv = "";
+    for (const branchName of Object.keys(groupedEligible)) {
+      csv += `Branch: ${branchName}\nCollege Code,College Name,Course,Category,Cutoff Rank\n`;
+      groupedEligible[branchName].forEach(col => {
+        csv += [
+          col.college_code, col.college_name, col.course, col.category, col.cutoff_rank
+        ].join(",") + "\n";
+      });
+      csv += "\n";
+    }
     const blob = new Blob([csv], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = window.URL.createObjectURL(blob);
-    link.download = "eligible_colleges.csv";
+    link.download = "eligible_colleges_by_branch.csv";
     link.click();
   };
 
@@ -130,7 +115,7 @@ export default function Home() {
     const response = await fetch("/api/generate-pdf", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eligibleColleges, nearMissColleges }),
+      body: JSON.stringify({ groupedEligible }),
     });
     if (!response.ok) {
       alert("Failed to generate PDF report. Please try again!");
@@ -197,16 +182,7 @@ export default function Home() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="font-semibold text-pink-700 block mb-1">Branch</label>
-            <select className="w-full border-2 border-pink-200 rounded-lg px-4 py-2 mt-1 bg-white" value={branch} onChange={e => setBranch(e.target.value)}>
-              <option value="">All Branches</option>
-              {branches.map(b => (
-                <option key={b} value={b}>{b}</option>
-              ))}
-            </select>
-          </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="font-semibold text-indigo-700 block mb-1">Your Rank</label>
             <input type="number" min="1" className="w-full border-2 border-indigo-200 rounded-lg px-4 py-2 mt-1 bg-white" value={rank} onChange={e => setRank(e.target.value)} required />
           </div>
@@ -235,90 +211,58 @@ export default function Home() {
           </div>
         )}
 
-        {paid && (eligibleColleges.length > 0 || nearMissColleges.length > 0) && (
+        {paid && groupedEligible && Object.keys(groupedEligible).length > 0 && (
           <section className="mt-10">
-            <h2 className="text-2xl font-black text-violet-700 mb-6 text-center tracking-tight">Eligible Colleges</h2>
-            {eligibleColleges.length > 0 ? (
-              <div className="overflow-x-auto rounded-2xl border-2 border-violet-100 bg-white shadow mb-10">
-                <table className="min-w-full divide-y divide-indigo-100 text-base">
-                  <thead className="bg-violet-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left font-semibold">College Code</th>
-                      <th className="px-4 py-2 text-left font-semibold">College Name</th>
-                      <th className="px-4 py-2 text-left font-semibold">Branch</th>
-                      <th className="px-4 py-2 text-left font-semibold">Course</th>
-                      <th className="px-4 py-2 text-left font-semibold">Category</th>
-                      <th className="px-4 py-2 text-left font-semibold">Cutoff Rank</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {eligibleColleges.map((col, idx) => (
-                      <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-violet-50"}>
-                        <td className="px-4 py-2">{col.college_code}</td>
-                        <td className="px-4 py-2">{col.college_name}</td>
-                        <td className="px-4 py-2">{col.branch}</td>
-                        <td className="px-4 py-2">{col.course}</td>
-                        <td className="px-4 py-2">{col.category}</td>
-                        <td className="px-4 py-2">{col.cutoff_rank}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="text-center text-lg text-pink-600 mb-6">No eligible colleges found.</div>
-            )}
-
-            {nearMissColleges.length > 0 && (
-              <>
-                <h3 className="text-lg font-bold text-emerald-700 mb-3 mt-6 text-center tracking-tight">
-                  Near Miss Colleges <span className="text-xs text-pink-700">(within 2000 ranks above your score)</span>
-                </h3>
-                <div className="overflow-x-auto rounded-2xl border-2 border-emerald-100 bg-white shadow mb-10">
-                  <table className="min-w-full divide-y divide-emerald-50 text-base">
-                    <thead className="bg-emerald-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left font-semibold">College Code</th>
-                        <th className="px-4 py-2 text-left font-semibold">College Name</th>
-                        <th className="px-4 py-2 text-left font-semibold">Branch</th>
-                        <th className="px-4 py-2 text-left font-semibold">Course</th>
-                        <th className="px-4 py-2 text-left font-semibold">Category</th>
-                        <th className="px-4 py-2 text-left font-semibold">Cutoff Rank</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {nearMissColleges.map((col, idx) => (
-                        <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-emerald-50"}>
-                          <td className="px-4 py-2">{col.college_code}</td>
-                          <td className="px-4 py-2">{col.college_name}</td>
-                          <td className="px-4 py-2">{col.branch}</td>
-                          <td className="px-4 py-2">{col.course}</td>
-                          <td className="px-4 py-2">{col.category}</td>
-                          <td className="px-4 py-2">{col.cutoff_rank}</td>
+            <h2 className="text-2xl font-black text-violet-700 mb-6 text-center tracking-tight">
+              Eligible Colleges (Grouped by Branch)
+            </h2>
+            <div className="space-y-10">
+              {Object.keys(groupedEligible).map(branchName => (
+                <div key={branchName} className="bg-white/90 rounded-2xl shadow border-2 border-emerald-100 px-4 py-6">
+                  <h3 className="text-xl font-bold text-emerald-600 mb-4 border-b border-emerald-200 pb-2">
+                    {branchName}
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-indigo-100 text-base">
+                      <thead className="bg-emerald-50">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-semibold">College Code</th>
+                          <th className="px-4 py-2 text-left font-semibold">College Name</th>
+                          <th className="px-4 py-2 text-left font-semibold">Course</th>
+                          <th className="px-4 py-2 text-left font-semibold">Category</th>
+                          <th className="px-4 py-2 text-left font-semibold">Cutoff Rank</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {groupedEligible[branchName].map((col, idx) => (
+                          <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-emerald-50"}>
+                            <td className="px-4 py-2">{col.college_code}</td>
+                            <td className="px-4 py-2">{col.college_name}</td>
+                            <td className="px-4 py-2">{col.course}</td>
+                            <td className="px-4 py-2">{col.category}</td>
+                            <td className="px-4 py-2">{col.cutoff_rank}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </>
-            )}
-
-            {(eligibleColleges.length > 0 || nearMissColleges.length > 0) && (
-              <div className="flex gap-4 justify-center">
-                <button
-                  className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-indigo-700 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
-                  onClick={handleDownloadCSV}
-                >
-                  Download as CSV
-                </button>
-                <button
-                  className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-rose-600 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
-                  onClick={handleDownloadPDF}
-                >
-                  Download as PDF
-                </button>
-              </div>
-            )}
+              ))}
+            </div>
+            <div className="flex gap-4 justify-center mt-8">
+              <button
+                className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-indigo-700 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
+                onClick={handleDownloadCSV}
+              >
+                Download as CSV
+              </button>
+              <button
+                className="mt-4 py-2 px-8 rounded-xl bg-gradient-to-r from-rose-600 to-emerald-500 text-white font-bold text-lg shadow hover:scale-105 transition"
+                onClick={handleDownloadPDF}
+              >
+                Download as PDF
+              </button>
+            </div>
           </section>
         )}
       </main>
