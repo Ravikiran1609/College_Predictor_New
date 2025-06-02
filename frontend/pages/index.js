@@ -144,7 +144,7 @@ export default function Home() {
           </div>
           <div>
             <h1 style={{fontSize: "2.7rem", fontWeight: 900, color: "#fff", margin: "0 0 7px"}}>CET College Predictor</h1>
-            <p style={{fontSize: 16, color: "#f0f9ff", margin: 0, letterSpacing: "0.01em", fontWeight: 400, whiteSpace: "nowrap"}}> Discover your college destiny. Unlock your best possibilities!</p>
+            <p style={{fontSize: 14, color: "#fca5a5", margin: 0, letterSpacing: "0.01em", fontWeight: 400, whiteSpace: "nowrap"}}> Discover your college destiny. Unlock your best possibilities!</p>
           </div>
         </div>
       </div>
