@@ -20,8 +20,8 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_xxxxxxxxxxxx",
-  key_secret: "xxxxxxxxxxxxxxxxxxxx",
+  key_id: "rzp_test_SmAPbhfUjKXBRl",
+  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
 });
 
 // Dropdown options
@@ -85,14 +85,18 @@ app.post("/api/unlock", (req, res) => {
   );
   eligible = eligible.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
 
-  // Near miss: cutoff_rank > userRank && cutoff_rank <= userRank + 2000
+  // Near miss: cutoff_rank < userRank && cutoff_rank >= userRank - 2000
   let nearMiss = records.filter(
     (r) =>
       r.course.toLowerCase() === course.toLowerCase() &&
       r.category.toLowerCase() === category.toLowerCase() &&
       (!branch || r.branch === branch) &&
-      parseInt(r.cutoff_rank) > userRank &&
-      parseInt(r.cutoff_rank) <= userRank + 2000
+      parseInt(r.cutoff_rank) < userRank &&
+      parseInt(r.cutoff_rank) >= userRank - 2000
+  );
+  // Remove any possible overlap
+  nearMiss = nearMiss.filter(
+    (r) => !eligible.some(e => e.college_code === r.college_code && e.branch === r.branch && e.cutoff_rank === r.cutoff_rank)
   );
   nearMiss = nearMiss.sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
 
