@@ -21,8 +21,8 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_xxxxxxxxxxxx",
-  key_secret: "xxxxxxxxxxxxxxxxxxxx",
+  key_id: "rzp_test_SmAPbhfUjKXBRl",
+  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
 });
 
 // Helper for robust branch matching
