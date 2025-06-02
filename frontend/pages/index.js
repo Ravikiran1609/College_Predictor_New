@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 function toTitle(str) {
-  // Capitalize first letter of each word for UI display
   return str.replace(/\b\w/g, l => l.toUpperCase());
 }
 
@@ -9,6 +8,7 @@ export default function Home() {
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
   const [branch, setBranch] = useState("");
+  const [rank, setRank] = useState("");
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -19,15 +19,15 @@ export default function Home() {
   const [paid, setPaid] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const apiURL = ""; // leave blank if using same domain/reverse proxy
+  const apiURL = ""; // Leave blank if using reverse proxy/docker nginx
 
   useEffect(() => {
     fetch(`${apiURL}/api/options`)
       .then(res => res.json())
       .then(data => {
-        setCourses(data.courses);
-        setCategories(data.categories);
-        setBranches(data.branches);
+        setCourses(data.courses || []);
+        setCategories(data.categories || []);
+        setBranches(data.branches || []);
       });
   }, []);
 
