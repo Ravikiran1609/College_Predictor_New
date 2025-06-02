@@ -18,13 +18,14 @@ services:
     environment:
       - NODE_ENV=production
 
-  nginx:
+    nginx:
     build: ./nginx
-    container_name: nginx
-    restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/docker-certs:/etc/nginx/certs:ro
     depends_on:
       - frontend
       - backend
-
+ 
