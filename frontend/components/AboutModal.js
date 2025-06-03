@@ -120,7 +120,7 @@ function AboutModal({ open, onClose }) {
           fontSize: isMobile ? 11.8 : 14,
           fontWeight: 600
         }}>
-          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:gkravikiran2@gmail.com" style={{ color: "#0ea5e9", textDecoration: "underline" }}>gkravikiran2@gmail.com</a>
+          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:rgk1695@gmail.com" style={{ color: "#0ea5e9", textDecoration: "underline" }}>rgk1695@gmail.com</a>
         </div>
       </div>
     </div>

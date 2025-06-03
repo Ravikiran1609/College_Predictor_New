@@ -286,7 +286,7 @@ export default function Home() {
         borderRadius: 30,
         boxShadow: "0 10px 32px #7c3aed14",
         border: "1.7px solid #e9d5ff",
-        marginTop: -40,
+        marginTop: 56,
         marginBottom: 32,
         padding: "42px 32px",
         background: "rgba(255,255,255,0.96)",
