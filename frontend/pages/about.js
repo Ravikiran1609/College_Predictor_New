@@ -51,7 +51,7 @@ export default function About() {
         <b>Note:</b> This predictor is based on the previous year's official CET cutoff data. Actual cutoffs and seat availability may vary for the current year.
       </div>
       <div style={{ marginTop: 40, color: "#475569" }}>
-        <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:info@flexiworks.in">info@flexiworks.in</a>
+        <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:gkravikiran2@gmail.com">info@flexiworks.in</a>
       </div>
     </div>
   );
