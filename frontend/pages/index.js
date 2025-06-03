@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-// Modal component for About/Guide
+// Responsive AboutModal
 function AboutModal({ open, onClose }) {
   // Simple media query to adjust modal styles for mobile
   const isMobile = typeof window !== "undefined" && window.innerWidth < 500;
@@ -141,7 +141,7 @@ export default function Home() {
   const [formError, setFormError] = useState("");
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  const apiURL = ""; // blank for reverse proxy; or your backend URL
+  const apiURL = "";
 
   useEffect(() => {
     fetch(`${apiURL}/api/options`)
@@ -259,15 +259,12 @@ export default function Home() {
     link.remove();
   };
 
-  // Brand color palette
   const violet = "#7c3aed";
-  const blue = "#6366f1";
   const teal = "#06b06a";
   const bg1 = "linear-gradient(90deg, #f5e6ff 0%, #f5fcff 100%)";
-  const bg2 = "linear-gradient(90deg, #f0abfc 0%, #a5b4fc 100%)";
 
   return (
-    <div style={{background: bg1, minHeight:"100vh"}}>
+    <div style={{ background: bg1, minHeight: "100vh" }}>
       {/* HEADER */}
       <div style={{
         width: "100%",
@@ -288,7 +285,7 @@ export default function Home() {
           justifyContent: "center"
         }}>
           <img
-            src="/college-logo.png" // Use /public/college-logo.png
+            src="/college-logo.png"
             alt="College Hero"
             style={{
               width: 64,
@@ -327,21 +324,20 @@ export default function Home() {
               transition: "all .14s",
               outline: "none"
             }}
-            onMouseOver={e => e.target.style.background="#ede9fe"}
-            onMouseOut={e => e.target.style.background="rgba(255,255,255,0.13)"}
+            onMouseOver={e => e.target.style.background = "#ede9fe"}
+            onMouseOut={e => e.target.style.background = "rgba(255,255,255,0.13)"}
           >
             About Us / User Guide
           </button>
         </div>
       </div>
-
       <main style={{
         maxWidth: 900,
         margin: "0 auto",
         borderRadius: 30,
         boxShadow: "0 10px 32px #7c3aed14",
         border: "1.7px solid #e9d5ff",
-        marginTop: 56,
+        marginTop: 56,   // <<--- This fixes logo-to-card spacing
         marginBottom: 32,
         padding: "42px 32px",
         background: "rgba(255,255,255,0.96)",
@@ -360,14 +356,11 @@ export default function Home() {
         }}>
           Prediction is purely based on previous year cutoff. It may vary for present year.
         </div>
-
         {formError && (
           <div style={{background: "#fca5a5", color: "#7f1d1d", padding: "12px", borderRadius: 8, textAlign: "center", marginBottom: 14}}>
             {formError}
           </div>
         )}
-
-        {/* FORM */}
         <form
           style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20}}
           onSubmit={e => { e.preventDefault(); handlePredict(); }}
@@ -397,7 +390,15 @@ export default function Home() {
               value={rank} onChange={e => setRank(e.target.value)} required
             />
           </div>
-          <div style={{gridColumn: "1 / span 2", textAlign: "center"}}>
+          <div style={{
+            gridColumn: "1 / span 2",
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 18,
+            flexWrap: "wrap"
+          }}>
             <button
               type="submit"
               className="ct-btn"
@@ -420,11 +421,41 @@ export default function Home() {
             >
               Find Eligible Colleges
             </button>
+            {paid && groupedEligible && Object.keys(groupedEligible).length > 0 && (
+              <>
+                <button className="ct-btn"
+                  type="button"
+                  onClick={handleDownloadCSV}
+                  style={{
+                    background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)",
+                    color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
+                    padding: "15px 24px", fontSize: "1.03rem", boxShadow: "0 1px 6px #7c3aed24",
+                    cursor: "pointer",
+                    marginLeft: 10
+                  }}
+                >
+                  Download as CSV
+                </button>
+                <button className="ct-btn"
+                  type="button"
+                  onClick={handleDownloadPDF}
+                  style={{
+                    background: "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)",
+                    color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
+                    padding: "15px 24px", fontSize: "1.03rem", boxShadow: "0 1px 6px #7c3aed24",
+                    cursor: "pointer"
+                  }}
+                >
+                  Download as PDF
+                </button>
+              </>
+            )}
           </div>
         </form>
 
+        {/* Payment screen */}
         {locked && !paid && (
-          <div style={{textAlign: "center", marginTop: 38}}>
+          <div style={{ textAlign: "center", marginTop: 38 }}>
             <div style={{
               background: "#fdf2f8",
               border: "1.3px solid #fbcfe8",
@@ -451,18 +482,19 @@ export default function Home() {
                 marginTop: 0,
                 transition: "all .13s"
               }}
-              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}     
+              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
               onMouseOut={e => { e.target.style.transform = "scale(1)"; e.target.style.background = "linear-gradient(90deg, #f472b6 0%, #06b06a 100%)"; }}
             >
               Pay ₹10 & Unlock Details
             </button>
-            <div style={{marginTop: 8, color: "#818cf8", fontSize: 13}}>One-time payment, unlock instantly!</div>
+            <div style={{ marginTop: 8, color: "#818cf8", fontSize: 13 }}>One-time payment, unlock instantly!</div>
           </div>
         )}
 
+        {/* Results */}
         {paid && groupedEligible && Object.keys(groupedEligible).length > 0 && (
-          <section style={{marginTop: 36}}>
-            <h2 style={{fontSize: "2rem", fontWeight: 900, color: "#7c3aed", textAlign: "center", marginBottom: 30}}>
+          <section style={{ marginTop: 36 }}>
+            <h2 style={{ fontSize: "2rem", fontWeight: 900, color: "#7c3aed", textAlign: "center", marginBottom: 30 }}>
               Eligible Colleges (Grouped by Branch)
             </h2>
             <div>
@@ -483,7 +515,7 @@ export default function Home() {
                     paddingBottom: 7,
                     marginBottom: 22
                   }}>{branchName}</div>
-                  <div style={{overflowX: "auto"}}>
+                  <div style={{ overflowX: "auto" }}>
                     <table className="table-elig" style={{
                       width: "100%",
                       borderCollapse: "collapse",
@@ -492,21 +524,21 @@ export default function Home() {
                     }}>
                       <thead>
                         <tr>
-                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>College Code</th>
-                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>College Name</th>
-                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Course</th>
-                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Category</th>
-                          <th style={{background:"#a7f3d0", color:"#3730a3", fontWeight:700, padding:"10px 12px"}}>Cutoff Rank</th>
+                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>College Code</th>
+                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>College Name</th>
+                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Course</th>
+                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Category</th>
+                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Cutoff Rank</th>
                         </tr>
                       </thead>
                       <tbody>
                         {groupedEligible[branchName].map((col, idx) => (
-                          <tr key={idx} style={{background: idx%2 ? "#f0fdfa" : "#fff"}}>
-                            <td style={{padding:"9px 12px"}}>{col.college_code}</td>
-                            <td style={{padding:"9px 12px"}}>{col.college_name}</td>
-                            <td style={{padding:"9px 12px"}}>{col.course}</td>
-                            <td style={{padding:"9px 12px"}}>{col.category}</td>
-                            <td style={{padding:"9px 12px"}}>{col.cutoff_rank}</td>
+                          <tr key={idx} style={{ background: idx % 2 ? "#f0fdfa" : "#fff" }}>
+                            <td style={{ padding: "9px 12px" }}>{col.college_code}</td>
+                            <td style={{ padding: "9px 12px" }}>{col.college_name}</td>
+                            <td style={{ padding: "9px 12px" }}>{col.course}</td>
+                            <td style={{ padding: "9px 12px" }}>{col.category}</td>
+                            <td style={{ padding: "9px 12px" }}>{col.cutoff_rank}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -514,34 +546,6 @@ export default function Home() {
                   </div>
                 </div>
               ))}
-            </div>
-            <div style={{display: "flex", gap: 22, justifyContent: "center", marginTop: 28}}>
-              <button className="ct-btn" onClick={handleDownloadCSV}
-                style={{
-                  background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)",
-                  color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
-                  padding: "13px 32px", fontSize: "1.09rem", boxShadow: "0 1px 6px #7c3aed24",
-                  cursor: "pointer",
-                  transition: "all .13s"
-                }}
-                onMouseOver={e => { e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
-                onMouseOut={e => { e.target.style.background = "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)"; }}
-              >
-                Download as CSV
-              </button>
-              <button className="ct-btn" onClick={handleDownloadPDF}
-                style={{
-                  background: "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)",
-                  color: "#fff", fontWeight: 700, border: "none", borderRadius: 999,
-                  padding: "13px 32px", fontSize: "1.09rem", boxShadow: "0 1px 6px #7c3aed24",
-                  cursor: "pointer",
-                  transition: "all .13s"
-                }}
-                onMouseOver={e => { e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
-                onMouseOut={e => { e.target.style.background = "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)"; }}
-              >
-                Download as PDF
-              </button>
             </div>
           </section>
         )}
@@ -556,8 +560,8 @@ export default function Home() {
       }}>
         &copy; {new Date().getFullYear()} CET College Predictor &nbsp; | &nbsp;
         <button style={{
-          color:'#0ea5e9', background: "none", border: "none", cursor: "pointer",
-          textDecoration: "underline", fontSize: 15.5, padding: 0, fontWeight:600
+          color: '#0ea5e9', background: "none", border: "none", cursor: "pointer",
+          textDecoration: "underline", fontSize: 15.5, padding: 0, fontWeight: 600
         }} onClick={() => setAboutOpen(true)}>
           About Us
         </button>
