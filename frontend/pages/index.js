@@ -199,7 +199,7 @@ export default function Home() {
     const order = await res.json();
 
     const options = {
-      key: "rzp_test_SmAPbhfUjKXBRl", // <-- Your Razorpay test key
+      key: "rzp_live_YoU8Mex88gOhS9", // <-- Your Razorpay test key
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",

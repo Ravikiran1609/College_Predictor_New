@@ -25,8 +25,8 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_test_SmAPbhfUjKXBRl",
-  key_secret: "R4EBI77YmgxKmHTkFmsVa9aN",
+  key_id: "rzp_live_YoU8Mex88gOhS9",
+  key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",
 });
 
 // For dropdowns: always return ACTUAL CSV values
