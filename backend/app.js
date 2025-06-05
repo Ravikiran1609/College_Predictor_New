@@ -5,10 +5,11 @@ const csv = require("csv-parser");
 const Razorpay = require("razorpay");
 const bodyParser = require("body-parser");
 const PDFDocument = require("pdfkit");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.json({ limit: "10mb", verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.json({ limit: "10mb" }));
 
 const PORT = process.env.PORT || 5000;
@@ -27,6 +28,38 @@ fs.createReadStream("Final_Data.csv")
 const razorpay = new Razorpay({
   key_id: "rzp_live_YoU8Mex88gOhS9",
   key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",
+});
+
+// ======== PAID ORDERS TRACKING (in-memory Set, replace with DB in prod) ========
+const paidOrders = new Set();
+
+// WEBHOOK secret string (set this in Razorpay dashboard)
+const RAZORPAY_WEBHOOK_SECRET = "Ravi@160995";
+
+// Razorpay Webhook handler: Mark order as paid when payment.captured
+app.post("/api/razorpay-webhook", (req, res) => {
+  const signature = req.headers["x-razorpay-signature"];
+  const expectedSignature = crypto
+    .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
+    .update(req.rawBody)
+    .digest("hex");
+  if (signature !== expectedSignature) {
+    return res.status(400).send("Invalid signature");
+  }
+  const event = req.body.event;
+  if (event === "payment.captured") {
+    const orderId = req.body.payload.payment.entity.order_id;
+    paidOrders.add(orderId);
+    console.log(`[Webhook] Order PAID: ${orderId}`);
+  }
+  res.json({ status: "ok" });
+});
+
+// Check payment status by order_id (frontend should poll after payment)
+app.get("/api/payment-status", (req, res) => {
+  const { order_id } = req.query;
+  if (!order_id) return res.json({ paid: false });
+  res.json({ paid: paidOrders.has(order_id) });
 });
 
 // For dropdowns: always return ACTUAL CSV values
@@ -75,7 +108,10 @@ app.post("/api/create-order", async (req, res) => {
 
 // Unlock after payment: group eligible colleges by branch, ascending by cutoff_rank
 app.post("/api/unlock", (req, res) => {
-  const { course, category, rank } = req.body;
+  const { course, category, rank, order_id } = req.body;
+  if (!paidOrders.has(order_id)) {
+    return res.status(402).json({ error: "Payment not confirmed for this order." });
+  }
   const userRank = parseInt(rank);
 
   // Find all eligible records (no branch filter)

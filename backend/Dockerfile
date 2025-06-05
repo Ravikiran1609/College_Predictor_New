@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install --production
 RUN npm install pdfkit
+RUN npm install body-parser crypto
 
 # Copy source code and data
 COPY app.js ./

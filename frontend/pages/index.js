@@ -138,6 +138,7 @@ export default function Home() {
   const [eligibleCount, setEligibleCount] = useState(0);
   const [groupedEligible, setGroupedEligible] = useState({});
   const [paid, setPaid] = useState(false);
+  const [orderId, setOrderId] = useState("");     // <-- NEW: to track current order
   const [formError, setFormError] = useState("");
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -167,6 +168,7 @@ export default function Home() {
     setPaid(false);
     setEligibleCount(0);
     setGroupedEligible({});
+    setOrderId("");
     const res = await fetch(`${apiURL}/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -183,6 +185,7 @@ export default function Home() {
     }
   };
 
+  // --- MAIN PAYMENT LOGIC ---
   const handlePayment = async () => {
     if (!window.Razorpay) {
       const script = document.createElement("script");
@@ -197,29 +200,61 @@ export default function Home() {
       body: JSON.stringify({ amount: 10 }),
     });
     const order = await res.json();
+    setOrderId(order.id);   // <-- store order id
 
     const options = {
-      key: "rzp_live_YoU8Mex88gOhS9", // <-- Your Razorpay test key
+      key: "rzp_live_YoU8Mex88gOhS9", // <-- Your Razorpay key
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",
       description: "Access your eligible colleges list",
       order_id: order.id,
-      handler: async function () {
-        setPaid(true);
-        const res2 = await fetch(`${apiURL}/api/unlock`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ course, category, rank }),
-        });
-        const data2 = await res2.json();
-        setGroupedEligible(data2.groupedEligible || {});
+      handler: function () {
+        // DO NOT unlock UI here; poll for webhook confirmation!
       },
       prefill: { name: "", email: "", contact: "" },
       theme: { color: "#7c3aed" },
     };
     const rzp1 = new window.Razorpay(options);
     rzp1.open();
+
+    // Start polling payment status after opening Razorpay checkout
+    pollPaymentStatus(order.id);
+  };
+
+  // --- POLLING PAYMENT STATUS ---
+  const pollPaymentStatus = (orderId) => {
+    let attempts = 0;
+    const maxAttempts = 24; // About 2 minutes
+    const interval = setInterval(async () => {
+      const res = await fetch(`/api/payment-status?order_id=${orderId}`);
+      const { paid: isPaid } = await res.json();
+      if (isPaid) {
+        clearInterval(interval);
+        setPaid(true);
+        setFormError("");
+        // Now fetch the unlocked data!
+        fetchUnlockedResult(orderId);
+      } else if (++attempts > maxAttempts) {
+        clearInterval(interval);
+        setFormError("Payment not confirmed yet. If money debited, please wait and try again after a minute.");
+      }
+    }, 5000); // every 5 sec
+  };
+
+  // --- Fetch unlocked data after webhook-paid ---
+  const fetchUnlockedResult = async (orderId) => {
+    const res2 = await fetch(`/api/unlock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ course, category, rank, order_id: orderId }),
+    });
+    if (res2.ok) {
+      const data2 = await res2.json();
+      setGroupedEligible(data2.groupedEligible || {});
+    } else {
+      setFormError("Payment confirmed but unlock failed. Please refresh or contact support.");
+    }
   };
 
   const handleDownloadCSV = () => {
@@ -482,7 +517,7 @@ export default function Home() {
                 marginTop: 0,
                 transition: "all .13s"
               }}
-              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}
+              onMouseOver={e => { e.target.style.transform = "scale(1.04)"; e.target.style.background = "linear-gradient(90deg, #06b06a 0%, #7c3aed 100%)"; }}     
               onMouseOut={e => { e.target.style.transform = "scale(1)"; e.target.style.background = "linear-gradient(90deg, #f472b6 0%, #06b06a 100%)"; }}
             >
               Pay ₹10 & Unlock Details
@@ -581,3 +616,4 @@ export default function Home() {
     </div>
   );
 }
+
