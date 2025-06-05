@@ -550,6 +550,17 @@ export default function Home() {
           </section>
         )}
       </main>
+      {/* === Disclaimer block === */}
+      <div style={{
+        margin: "18px 0 0",
+        fontSize: 14.5,
+        color: "#818cf8",
+        textAlign: "center",
+        fontStyle: "italic",
+        lineHeight: 1.6
+      }}>
+        Disclaimer: This tool is based on publicly available data based on previous years cutoff. Actual seat availability, cutoffs, and admission outcomes may vary for the current year.
+      </div>
       <footer style={{
         margin: "24px 0 8px",
         color: "#7c3aed",
