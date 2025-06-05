@@ -415,17 +415,38 @@ export default function Home() {
           </section>
         )}
       </main>
-          {/* === Disclaimer block === */}
-      <div style={{
-        margin: "18px 0 0",
-        fontSize: 14.5,
-        color: "#818cf8",
-        textAlign: "center",
-        fontStyle: "italic",
-        lineHeight: 1.6
+	  <div style={{
+	    background: "#fffbe5",
+		borderRadius: 10,
+		padding: "10px 12px 6px",
+		margin: "0 auto 13px",
+		color: "#a16207",
+		fontSize: 15.6,
+		fontWeight: 700,
+		textAlign: "left",
+		maxWidth: 410
+	  }}>
+	    <span style={{ fontWeight: 700 }}>
+		  <span style={{ color: "#ea580c" }}>Important:</span> If you pay using a UPI app (GPay, PhonePe, etc.) and see a <span style={{ color: "#e11d48" }}>"Payment could not be completed"</span> message, <u>do not worry!</u> <br />
+		  <span style={{ color: "#3730a3" }}>
+		    If money is debited, simply click <b>Retry Unlock</b> below. Your payment will be verified and you’ll get access instantly.
+		  </span>
+		  <br />
+		  <span style={{ color: "#ef4444" }}><b>Never pay twice.</b></span> <br />
+		  This message is common for UPI app payments. If payment was debited, <b>Retry Unlock</b> or contact support with your payment/order ID.
+		</span>
+	  </div>
+	  {/* === Disclaimer Block === */}
+	  <div style={{
+	    margin: "18px 0 0",
+		fontSize: 14.5,
+		color: "#818cf8",
+		textAlign: "center",
+		fontStyle: "italic",
+		lineHeight: 1.6
       }}>
-        Disclaimer: This tool is based on publicly available data based on previous years cutoff. Actual seat availability, cutoffs, and admission outcomes may vary for the current year.
-      </div>
+	    Disclaimer: This tool is based on publicly available data based on previous years’ cutoffs. Actual seat availability, cutoffs, and admission outcomes may vary for the current year.
+	  </div>
       <footer style={{
         margin: "24px 0 8px",
         color: "#7c3aed",
