@@ -34,7 +34,7 @@ const razorpay = new Razorpay({
 const paidOrders = new Set();
 
 // WEBHOOK secret string (set this in Razorpay dashboard)
-const RAZORPAY_WEBHOOK_SECRET = "your_webhook_secret_here";
+const RAZORPAY_WEBHOOK_SECRET = "ravi123";
 
 // Razorpay Webhook handler: Mark order as paid when payment.captured
 app.post("/api/razorpay-webhook", (req, res) => {
