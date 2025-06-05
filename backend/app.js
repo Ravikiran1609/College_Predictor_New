@@ -26,15 +26,15 @@ fs.createReadStream("Final_Data.csv")
 
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_live_YoU8Mex88gOhS9",
-  key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",
+  key_id: "rzp_live_YoU8Mex88gOhS9",        // your Razorpay key_id
+  key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",   // your Razorpay key_secret
 });
 
 // ======== PAID ORDERS TRACKING (in-memory Set, replace with DB in prod) ========
 const paidOrders = new Set();
 
 // WEBHOOK secret string (set this in Razorpay dashboard)
-const RAZORPAY_WEBHOOK_SECRET = "Ravi@160995";
+const RAZORPAY_WEBHOOK_SECRET = "your_webhook_secret_here";
 
 // Razorpay Webhook handler: Mark order as paid when payment.captured
 app.post("/api/razorpay-webhook", (req, res) => {
@@ -43,7 +43,9 @@ app.post("/api/razorpay-webhook", (req, res) => {
     .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
     .update(req.rawBody)
     .digest("hex");
+  console.log("Webhook received raw:", req.rawBody?.toString()); // DEBUG
   if (signature !== expectedSignature) {
+    console.log("Invalid webhook signature", signature, expectedSignature);
     return res.status(400).send("Invalid signature");
   }
   const event = req.body.event;
@@ -55,11 +57,24 @@ app.post("/api/razorpay-webhook", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Check payment status by order_id (frontend should poll after payment)
-app.get("/api/payment-status", (req, res) => {
+// Fallback: Check payment status by order_id (frontend should poll after payment)
+app.get("/api/payment-status", async (req, res) => {
   const { order_id } = req.query;
   if (!order_id) return res.json({ paid: false });
-  res.json({ paid: paidOrders.has(order_id) });
+
+  if (paidOrders.has(order_id)) return res.json({ paid: true });
+
+  // Fallback: Check Razorpay Orders API directly if not already marked paid
+  try {
+    const order = await razorpay.orders.fetch(order_id);
+    if (order.status === "paid") {
+      paidOrders.add(order_id);
+      return res.json({ paid: true });
+    }
+  } catch (e) {
+    console.log("Error fetching order:", e);
+  }
+  res.json({ paid: false });
 });
 
 // For dropdowns: always return ACTUAL CSV values
