@@ -54,7 +54,7 @@ function AboutModal({ open, onClose }) {
 
 // --- MAIN PAGE ---
 export default function Home() {
-  const [round, setRound] = useState("R1"); // R1, R2, R3
+  const [round, setRound] = useState("Round 1"); // R1, R2, R3
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
   const [rank, setRank] = useState("");
@@ -73,7 +73,7 @@ export default function Home() {
 
   // Fetch dropdowns when round changes
   useEffect(() => {
-    fetch(`${apiURL}/api/options?round=${round}`)
+    fetch(`/api/options?round=${encodeURIComponent(round)}`)
       .then(res => res.json())
       .then(data => {
         setCourses(data.courses || []);
@@ -99,7 +99,7 @@ export default function Home() {
     setEligibleCount(0);
     setGroupedEligible({});
     setOrderId("");
-    const res = await fetch(`${apiURL}/api/predict`, {
+    const res = await fetch(`/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ course, category, rank, round }),
@@ -288,9 +288,9 @@ export default function Home() {
             <select style={{
               width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9, padding: "10px 8px", marginTop: 5
             }} value={round} onChange={e => setRound(e.target.value)}>
-              <option value="R1">Round 1</option>
-              <option value="R2">Round 2</option>
-              <option value="R3">Round 3</option>
+              <option value="Round 1">Round 1</option>
+              <option value="Round 2">Round 2</option>
+              <option value="Round 3">Round 3</option>
             </select>
           </div>
           <div>
@@ -479,4 +479,3 @@ export default function Home() {
     </div>
   );
 }
-
