@@ -10,7 +10,7 @@ RUN npm install body-parser crypto
 
 # Copy source code and data
 COPY app.js ./
-COPY Final_Data.csv ./
+COPY Final*.csv ./
 
 EXPOSE 5000
 
