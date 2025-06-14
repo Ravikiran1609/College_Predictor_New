@@ -14,35 +14,31 @@ app.use(express.json({ limit: "10mb" }));
 
 const PORT = process.env.PORT || 5000;
 
-// File mapping for each round
 const ROUND_FILES = {
   "Round 1": "Final_Data.csv",
   "Round 2": "Final_data_second_round.csv",
   "Round 3": "Final_data_Third_Round.csv"
 };
-const roundRecords = { "Round 1": [], "Round 2": [], "Round 3": [] };
-const roundLoaded = { "Round 1": false, "Round 2": false, "Round 3": false };
-
-// Async CSV loader
-for (const [round, file] of Object.entries(ROUND_FILES)) {
-  roundRecords[round] = [];
-  roundLoaded[round] = false;
-  if (fs.existsSync(file)) {
-    fs.createReadStream(file)
-      .pipe(csv())
-      .on("data", (row) => roundRecords[round].push(row))
-      .on("end", () => {
-        roundLoaded[round] = true;
-        console.log(`CSV Loaded for ${round}:`, roundRecords[round].length, "rows");
-      });
-  } else {
-    console.log(`File not found: ${file}, ${round} will be empty.`);
-    roundLoaded[round] = true; // treat missing as "loaded"
-  }
-}
+const roundCache = {}; // e.g., { "Round 1": [...] }
 
 function norm(str) {
   return (str || "").trim().toLowerCase();
+}
+
+// Helper: Load and cache data for a round
+function getRecordsForRound(round, cb) {
+  if (roundCache[round]) return cb(null, roundCache[round]);
+  const file = ROUND_FILES[round];
+  if (!file || !fs.existsSync(file)) return cb(null, []);
+  const rows = [];
+  fs.createReadStream(file)
+    .pipe(csv())
+    .on("data", row => rows.push(row))
+    .on("end", () => {
+      roundCache[round] = rows;
+      cb(null, rows);
+    })
+    .on("error", err => cb(err));
 }
 
 // Razorpay config (use your actual keys)
@@ -93,32 +89,31 @@ app.get("/api/payment-status", async (req, res) => {
   res.json({ paid: false });
 });
 
-// Dropdown options, by round
+// Dropdown options, by round (lazy load and cache)
 app.get("/api/options", (req, res) => {
   const round = req.query.round || "Round 1";
-  // Only respond if data is ready
-  if (!roundLoaded[round]) {
-    return res.status(202).json({ courses: [], categories: [], loading: true });
-  }
-  const records = roundRecords[round] || [];
-  const courses = [...new Set(records.map(r => (r.course || "").trim()))].filter(Boolean).sort();
-  const categories = [...new Set(records.map(r => (r.category || "").trim()))].filter(Boolean).sort();
-  res.json({ courses, categories });
+  getRecordsForRound(round, (err, records) => {
+    if (err) return res.status(500).json({ courses: [], categories: [], error: "File read error" });
+    const courses = [...new Set(records.map(r => (r.course || "").trim()))].filter(Boolean).sort();
+    const categories = [...new Set(records.map(r => (r.category || "").trim()))].filter(Boolean).sort();
+    res.json({ courses, categories });
+  });
 });
 
-// Predict eligible count (per round)
+// Predict eligible count (per round, lazy)
 app.post("/api/predict", (req, res) => {
   let { course, category, rank, round } = req.body;
   round = round || "Round 1";
-  const records = roundRecords[round] || [];
-  if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
-  const result = records.filter(
-    (r) =>
-      norm(r.course) === norm(course) &&
-      norm(r.category) === norm(category) &&
-      parseInt(rank) <= parseInt(r.cutoff_rank)
-  );
-  res.json({ eligibleCount: result.length, locked: true });
+  getRecordsForRound(round, (err, records) => {
+    if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
+    const result = records.filter(
+      (r) =>
+        norm(r.course) === norm(course) &&
+        norm(r.category) === norm(category) &&
+        parseInt(rank) <= parseInt(r.cutoff_rank)
+    );
+    res.json({ eligibleCount: result.length, locked: true });
+  });
 });
 
 // Razorpay order
@@ -145,34 +140,35 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// Unlock after payment: grouped by branch (per round)
+// Unlock after payment: grouped by branch (per round, lazy)
 app.post("/api/unlock", (req, res) => {
   let { course, category, rank, order_id, round } = req.body;
   round = round || "Round 1";
   if (!paidOrders.has(order_id)) {
     return res.status(402).json({ error: "Payment not confirmed for this order." });
   }
-  const userRank = parseInt(rank);
-  const records = roundRecords[round] || [];
-  const eligible = records.filter(
-    (r) =>
-      norm(r.course) === norm(course) &&
-      norm(r.category) === norm(category) &&
-      userRank <= parseInt(r.cutoff_rank)
-  );
-  const grouped = {};
-  eligible.forEach(row => {
-    const branch = row.branch || "Other";
-    if (!grouped[branch]) grouped[branch] = [];
-    grouped[branch].push(row);
+  getRecordsForRound(round, (err, records) => {
+    const userRank = parseInt(rank);
+    const eligible = records.filter(
+      (r) =>
+        norm(r.course) === norm(course) &&
+        norm(r.category) === norm(category) &&
+        userRank <= parseInt(r.cutoff_rank)
+    );
+    const grouped = {};
+    eligible.forEach(row => {
+      const branch = row.branch || "Other";
+      if (!grouped[branch]) grouped[branch] = [];
+      grouped[branch].push(row);
+    });
+    for (const branch in grouped) {
+      grouped[branch].sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
+    }
+    res.json({ groupedEligible: grouped });
   });
-  for (const branch in grouped) {
-    grouped[branch].sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
-  }
-  res.json({ groupedEligible: grouped });
 });
 
-// PDF report (per round, but client must send groupedEligible)
+// PDF report (client must send groupedEligible)
 app.post("/api/generate-pdf", (req, res) => {
   const { groupedEligible } = req.body;
   const doc = new PDFDocument({ margin: 30, size: "A4" });
