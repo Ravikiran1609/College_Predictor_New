@@ -1,469 +1,443 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Script from "next/script";
 
-// --- AboutModal (customize as needed) ---
 function AboutModal({ open, onClose }) {
   if (!open) return null;
   return (
     <div style={{
-      position: "fixed", zIndex: 9999, top: 0, left: 0, width: "100vw", height: "100vh",
-      background: "rgba(48,19,69,0.24)", display: "flex", justifyContent: "center", alignItems: "center"
+      position: "fixed", top: 0, left: 0, zIndex: 9999, width: "100vw", height: "100vh",
+      background: "rgba(120,70,255,0.10)", display: "flex", alignItems: "center", justifyContent: "center"
     }}>
       <div style={{
-        background: "#f8f6ff", maxWidth: 540, width: "90vw", borderRadius: 16, boxShadow: "0 12px 64px #6366f115",
-        padding: "40px 28px 34px 28px", position: "relative", border: "1.5px solid #d1d5db"
+        background: "#fff", borderRadius: 18, maxWidth: 520, width: "96vw", boxShadow: "0 12px 30px #7c3aed30",
+        padding: "34px 32px 30px 32px", position: "relative", margin: "10px", overflowY: "auto", maxHeight: "94vh"
       }}>
-        <button style={{
-          position: "absolute", right: 16, top: 12, fontSize: 32, color: "#7c3aed", background: "none",
-          border: "none", cursor: "pointer", fontWeight: 900, lineHeight: 1
-        }} onClick={onClose} title="Close">&times;</button>
-        <h1 style={{ fontSize: "2rem", fontWeight: 900, color: "#7c3aed", marginBottom: 10, marginTop: 0 }}>About Us</h1>
-        <p style={{ fontSize: 16.7, color: "#2d205b", marginBottom: 26 }}>
-          <strong>CET College Predictor</strong> is a vibrant, secure web platform designed to help students quickly discover which colleges they are eligible for, based on their CET rank and category.<br /><br />
-          <span style={{ color: "#06b06a", fontWeight: 600 }}>This website is proudly owned and operated by <b>Flexiworks</b>.</span>
-        </p>
-        <h2 style={{
-          fontSize: "1.15rem", color: "#4f46e5", marginBottom: 9, fontWeight: 800, marginTop: 28, letterSpacing: "0.01em"
-        }}>User Guide</h2>
-        <ol style={{
-          color: "#2d205b", fontSize: 15.6, lineHeight: 1.63, paddingLeft: 24, marginBottom: 20
-        }}>
-          <li><b>Select your Course and Category:</b><br />Use the dropdowns to select your course and category.</li>
-          <li><b>Enter your CET Rank:</b><br />Type your CET rank in the provided box.</li>
-          <li><b>Find Eligible Colleges:</b><br />Click on <b>Find Eligible Colleges</b> to see how many you’re eligible for.</li>
-          <li><b>Unlock Full List & Download:</b><br />Pay ₹10 to instantly unlock and download your result.</li>
+        <button onClick={onClose} style={{
+          position: "absolute", right: 17, top: 14, background: "none", border: "none", fontSize: 30, color: "#9333ea", cursor: "pointer"
+        }}>&times;</button>
+        <div style={{ fontSize: 36, fontWeight: 900, color: "#9333ea", marginBottom: 10 }}>About Us</div>
+        <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 8 }}>
+          <span style={{ color: "#9333ea" }}>CET College Predictor</span>
+        </div>
+        <div style={{ fontSize: 15, marginBottom: 16 }}>
+          is a secure platform by <b>Flexiworks</b> for Karnataka CET students to instantly discover which Engineering & Agriculture colleges they can get, based on their rank and category. No registration needed!
+        </div>
+        <div style={{ fontSize: 17, fontWeight: 800, margin: "22px 0 8px", color: "#2563eb" }}>User Guide</div>
+        <ol style={{ fontSize: 15, marginLeft: 18, marginBottom: 0, paddingLeft: 12 }}>
+          <li>
+            <b>Select Round, Course &amp; Category:</b>
+            <span> Use the dropdowns for the current counselling round and your reservation category.</span>
+          </li>
+          <li>
+            <b>Enter your Rank:</b>
+            <span> Fill your official CET rank.</span>
+          </li>
+          <li>
+            <b>Find Eligible Colleges:</b>
+            <span> Click <b>Find Eligible Colleges</b> to see how many options you have, grouped by branch.</span>
+          </li>
+          <li>
+            <b>Pay &amp; Unlock List:</b>
+            <span> One-time ₹10 payment via Razorpay unlocks the full detailed college list (PDF/CSV export available).</span>
+          </li>
+          <li>
+            <b>Download/Print:</b>
+            <span> Save your personalized list for later reference.</span>
+          </li>
         </ol>
-        <div style={{
-          color: "#7c3aed", fontSize: 13, marginTop: 24, fontWeight: 600
-        }}>
-          <b>Note:</b> This predictor is based on the previous year's official CET cutoff data. Actual cutoffs and seat availability may vary for the current year.
+        <div style={{ margin: "18px 0 0", fontSize: 14, color: "#64748b" }}>
+          <b>Disclaimer:</b> This app predicts eligibility using official, publicly available data from past CET rounds.
+          Actual cutoffs may vary this year.
         </div>
-        <div style={{
-          marginTop: 22, color: "#818cf8", fontSize: 13.2, fontStyle: "italic"
-        }}>
-          Disclaimer: The information provided is sourced from publicly available official data. The website is not affiliated with KEA or any government agency.  
-        </div>
-        <div style={{
-          marginTop: 26, color: "#2d205b", fontSize: 14, fontWeight: 600
-        }}>
-          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:info@flexiworks.in" style={{ color: "#0ea5e9", textDecoration: "underline" }}>info@flexiworks.in</a>
+        <div style={{ margin: "20px 0 0", fontSize: 14, color: "#374151" }}>
+          For queries: <b>info@flexiworks.in</b>
         </div>
       </div>
     </div>
   );
 }
 
-// --- MAIN PAGE ---
 export default function Home() {
+  // Main UI state
+  const [round, setRound] = useState("R1");
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
   const [rank, setRank] = useState("");
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [locked, setLocked] = useState(false);
-  const [eligibleCount, setEligibleCount] = useState(0);
-  const [groupedEligible, setGroupedEligible] = useState({});
+  const [eligibleCount, setEligibleCount] = useState(null);
+  const [locked, setLocked] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [razorpayOrder, setRazorpayOrder] = useState(null);
+  const [orderId, setOrderId] = useState("");
   const [paid, setPaid] = useState(false);
-  const [orderId, setOrderId] = useState(""); // Store current order id
-  const [formError, setFormError] = useState("");
-  const [aboutOpen, setAboutOpen] = useState(false);
+  const [groupedEligible, setGroupedEligible] = useState(null);
+  const [options, setOptions] = useState({ courses: [], categories: [] });
   const [polling, setPolling] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
-  const apiURL = "";
-
+  // Load dropdown options
   useEffect(() => {
-    fetch(`${apiURL}/api/options`)
-      .then(res => res.json())
-      .then(data => {
-        setCourses(data.courses || []);
-        setCategories(data.categories || []);
-      });
-  }, []);
+    fetch(`/api/options?round=${round}`).then(r => r.json()).then(setOptions);
+    setCourse("");
+    setCategory("");
+    setEligibleCount(null);
+    setGroupedEligible(null);
+    setLocked(true);
+  }, [round]);
 
-  const validateForm = () => {
-    if (!course || !category || !rank) {
-      setFormError("Please select Course, Category, and enter Rank.");
-      return false;
+  // Poll payment status after order is created
+  useEffect(() => {
+    let poll;
+    if (polling && orderId) {
+      poll = setInterval(async () => {
+        let res = await fetch(`/api/payment-status?order_id=${orderId}`);
+        let data = await res.json();
+        if (data.paid) {
+          setPaid(true);
+          setPolling(false);
+          unlockAfterPayment();
+          clearInterval(poll);
+        }
+      }, 1800);
     }
-    setFormError("");
-    return true;
-  };
+    return () => poll && clearInterval(poll);
+  }, [polling, orderId]);
 
-  const handlePredict = async () => {
-    if (!validateForm()) return;
-    setLocked(false);
+  function reset() {
+    setEligibleCount(null);
+    setLocked(true);
+    setPaying(false);
     setPaid(false);
-    setEligibleCount(0);
-    setGroupedEligible({});
+    setGroupedEligible(null);
     setOrderId("");
-    const res = await fetch(`${apiURL}/api/predict`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course, category, rank }),
-    });
-    const data = await res.json();
-    if (data.error) {
-      setFormError(data.error);
-      setLocked(false);
-    } else {
-      setEligibleCount(data.eligibleCount);
-      setLocked(true);
-      setFormError("");
-    }
-  };
+    setRazorpayOrder(null);
+  }
 
-  const handlePayment = async () => {
-    setFormError("");
-    if (!window.Razorpay) {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true;
-      document.body.appendChild(script);
-      await new Promise((resolve) => { script.onload = resolve; });
+  // Predict eligible count
+  async function handlePredict(e) {
+    e.preventDefault();
+    reset();
+    if (!course || !category || !rank) {
+      alert("Please select round, course, category and enter your rank.");
+      return;
     }
-    const res = await fetch(`${apiURL}/api/create-order`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: 10 }),
+    let res = await fetch("/api/predict", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ course, category, rank, round })
     });
-    const order = await res.json();
+    let data = await res.json();
+    setEligibleCount(data.eligibleCount);
+    setLocked(data.locked !== false);
+  }
+
+  // Unlock full report: payment flow
+  async function handleUnlock() {
+    setPaying(true);
+    // Create Razorpay order
+    let res = await fetch("/api/create-order", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: 10 })
+    });
+    let order = await res.json();
+    setRazorpayOrder(order);
     setOrderId(order.id);
+    setPaying(false);
 
-    const options = {
-      key: "rzp_live_YoU8Mex88gOhS9", // <-- Your Razorpay key
+    // Show Razorpay checkout
+    const rzp = new window.Razorpay({
+      key: "rzp_live_YoU8Mex88gOhS9",
       amount: order.amount,
       currency: order.currency,
       name: "CET College Predictor",
       description: "Access your eligible colleges list",
       order_id: order.id,
-      handler: function () {
-        // Do NOT unlock UI here; poll for webhook/API fallback
+      handler: function (resp) {
+        setPolling(true);
       },
-      prefill: { name: "", email: "", contact: "" },
+      modal: {
+        ondismiss: function () {
+          setPolling(true); // Start polling even if modal closed
+        }
+      },
       theme: { color: "#7c3aed" },
-    };
-    const rzp1 = new window.Razorpay(options);
-    rzp1.open();
-
-    pollPaymentStatus(order.id);
-  };
-
-  // Poll payment status (webhook or Orders API fallback)
-  const pollPaymentStatus = (orderId) => {
-    setPolling(true);
-    let attempts = 0;
-    const maxAttempts = 36; // 3 minutes
-    const interval = setInterval(async () => {
-      const res = await fetch(`/api/payment-status?order_id=${orderId}`);
-      const { paid: isPaid } = await res.json();
-      if (isPaid) {
-        clearInterval(interval);
-        setPaid(true);
-        setPolling(false);
-        setFormError("");
-        fetchUnlockedResult(orderId);
-      } else if (++attempts > maxAttempts) {
-        clearInterval(interval);
-        setPolling(false);
-        setFormError(
-          "Payment not confirmed yet. If money debited, please click 'Retry Unlock' below after waiting a bit, or contact support with your order ID."
-        );
-      }
-    }, 5000);
-  };
-
-  // Retry Unlock
-  const handleRetryUnlock = () => {
-    if (!orderId) return setFormError("No recent payment found to retry. Please pay again.");
-    setFormError("");
-    pollPaymentStatus(orderId);
-  };
-
-  // Fetch unlocked data after paid
-  const fetchUnlockedResult = async (orderId) => {
-    const res2 = await fetch(`/api/unlock`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course, category, rank, order_id: orderId }),
+      retry: false,
     });
-    if (res2.ok) {
-      const data2 = await res2.json();
-      setGroupedEligible(data2.groupedEligible || {});
-    } else {
-      setFormError("Payment confirmed but unlock failed. Please refresh or contact support.");
-    }
-  };
+    rzp.open();
+    setPolling(true);
+  }
 
-  // Download CSV (example)
-  const handleDownloadCSV = () => {
-    let csv = "";
-    for (const branchName of Object.keys(groupedEligible)) {
-      csv += `Branch: ${branchName}\nCollege Code,College Name,Course,Category,Cutoff Rank\n`;
-      groupedEligible[branchName].forEach(col => {
+  // After successful payment, fetch unlock data
+  async function unlockAfterPayment() {
+    let res = await fetch("/api/unlock", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ course, category, rank, order_id: orderId, round })
+    });
+    let data = await res.json();
+    setGroupedEligible(data.groupedEligible);
+    setLocked(false);
+  }
+
+  // Retry unlock (if payment debited but modal showed failed)
+  async function handleRetryUnlock() {
+    setPolling(true);
+    let res = await fetch(`/api/payment-status?order_id=${orderId}`);
+    let data = await res.json();
+    if (data.paid) {
+      setPaid(true);
+      setPolling(false);
+      unlockAfterPayment();
+    } else {
+      setPolling(false);
+      alert("Payment not confirmed yet. Please wait a few seconds and try Retry Unlock again. Never pay twice.");
+    }
+  }
+
+  // Download CSV or PDF
+  function handleDownloadCSV() {
+    if (!groupedEligible) return;
+    let csv = "Branch,College Code,College Name,Course,Category,Cutoff Rank\n";
+    for (let branch in groupedEligible) {
+      groupedEligible[branch].forEach(row => {
         csv += [
-          col.college_code, col.college_name, col.course, col.category, col.cutoff_rank
+          branch, row.college_code, `"${row.college_name}"`, row.course, row.category, row.cutoff_rank
         ].join(",") + "\n";
       });
-      csv += "\n";
     }
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "eligible_colleges_by_branch.csv";
-    link.click();
-  };
-
-  // Download PDF (example, must match your backend)
-  const handleDownloadPDF = async () => {
-    const response = await fetch("/api/generate-pdf", {
+    let blob = new Blob([csv], { type: "text/csv" });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url; a.download = "college_report.csv";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+  }
+  async function handleDownloadPDF() {
+    if (!groupedEligible) return;
+    let res = await fetch("/api/generate-pdf", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ groupedEligible }),
+      body: JSON.stringify({ groupedEligible })
     });
-    if (!response.ok) {
-      alert("Failed to generate PDF report. Please try again!");
-      return;
-    }
-    const blob = await response.blob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "college_report.pdf";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
+    let blob = await res.blob();
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url; a.download = "college_report.pdf";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+  }
 
-  // --- UI ---
   return (
-    <div style={{ background: "linear-gradient(90deg, #f5e6ff 0%, #f5fcff 100%)", minHeight: "100vh" }}>
-      <div style={{
-        width: "100%", paddingTop: 28, paddingBottom: 28, marginBottom: -36,
-        display: "flex", justifyContent: "center",
-        background: "linear-gradient(90deg,#7c3aed 0,#f472b6 60%,#06b06a 100%)", boxShadow: "0 4px 32px #bdb4fb24"
+    <div style={{
+      minHeight: "100vh", background: "linear-gradient(125deg, #a78bfa 0%, #fbc2eb 80%, #34d399 100%)",
+      fontFamily: "'Nunito', Arial, sans-serif"
+    }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
+      {/* Header */}
+      <header style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "linear-gradient(90deg,#9333ea,#06b6d4 90%)", padding: "0 2vw", height: 58
       }}>
-        <div style={{
-          maxWidth: 940, width: "100%", display: "flex", alignItems: "center", gap: 26, justifyContent: "center"
-        }}>
-          <img src="/college-logo.png" alt="College Hero" style={{
-            width: 64, height: 64, borderRadius: 13, border: "2.5px solid #fff",
-            background: "#fff", boxShadow: "0 1.5px 6px #fff8", objectFit: "contain"
-          }} />
-          <div>
-            <h1 style={{
-              fontSize: "2.3rem", fontWeight: 900, color: "#fff", margin: "0 0 4px", letterSpacing: "0.01em"
-            }}>CET College Predictor</h1>
-          </div>
-          <button
-            onClick={() => setAboutOpen(true)}
-            style={{
-              marginLeft: "auto", background: "rgba(255,255,255,0.13)", color: "#fff", fontSize: "1.05rem",
-              padding: "9px 20px", borderRadius: 10, border: "none", cursor: "pointer", fontWeight: 700,
-              boxShadow: "0 1px 8px #7c3aed30", transition: "all .14s", outline: "none"
-            }}
-          >About Us / User Guide</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src="/college-logo.png" alt="College Hero" style={{ height: 48, width: 48, borderRadius: 13, marginRight: 3, background: "#fff" }} />
+          <span style={{
+            fontWeight: 900, fontSize: 22, letterSpacing: ".02em",
+            color: "#fff"
+          }}>CET College Predictor</span>
         </div>
-      </div>
+        <button style={{
+          background: "#ede9fe", color: "#7c3aed", border: "none", borderRadius: 11,
+          fontWeight: 800, fontSize: 18, padding: "8px 20px", cursor: "pointer", marginRight: 10
+        }} onClick={() => setAboutOpen(true)}>
+          About Us / User Guide
+        </button>
+      </header>
+      {/* Main box */}
       <main style={{
-        maxWidth: 900, margin: "0 auto", borderRadius: 30, boxShadow: "0 10px 32px #7c3aed14",
-        border: "1.7px solid #e9d5ff", marginTop: 56, marginBottom: 32, padding: "42px 32px",
-        background: "rgba(255,255,255,0.96)", backdropFilter: "blur(7px)"
+        maxWidth: 820, margin: "42px auto 0", background: "#fff", borderRadius: 36, padding: "36px 18px 38px",
+        boxShadow: "0 12px 40px #7c3aed18", minHeight: 500, position: "relative", zIndex: 1
       }}>
+        {/* Note */}
         <div style={{
-          background: "#e0e7ff", color: "#4f46e5", border: "1.4px solid #a5b4fc", padding: 16, borderRadius: 15,
-          textAlign: "center", marginBottom: 30, fontSize: "1.09rem", fontWeight: 500
+          background: "#e0e7ff", borderRadius: 18, color: "#3730a3", fontSize: 18, fontWeight: 600,
+          textAlign: "center", marginBottom: 36, padding: "15px 12px"
         }}>
           Prediction is purely based on previous year cutoff. It may vary for present year.
         </div>
-        {formError && (
-          <div style={{
-            background: "#fca5a5", color: "#7f1d1d", padding: "12px", borderRadius: 8,
-            textAlign: "center", marginBottom: 14
-          }}>{formError}</div>
-        )}
-        <form style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}
-          onSubmit={e => { e.preventDefault(); handlePredict(); }}>
-          <div>
-            <label style={{ fontWeight: 700, color: "#4f46e5" }}>Course</label>
-            <select style={{
-              width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9, padding: "10px 8px", marginTop: 5
-            }} value={course} onChange={e => setCourse(e.target.value)} required>
-              <option value="">Select Course</option>
-              {courses.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 700, color: "#06b06a" }}>Category</label>
-            <select style={{
-              width: "100%", fontSize: 17, border: "2px solid #bbf7d0", borderRadius: 9, padding: "10px 8px", marginTop: 5
-            }} value={category} onChange={e => setCategory(e.target.value)} required>
-              <option value="">Select Category</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-          <div style={{ gridColumn: "1 / span 2" }}>
-            <label style={{ fontWeight: 700, color: "#4f46e5" }}>Your Rank</label>
-            <input type="number" min="1"
-              style={{
-                width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9,
-                padding: "10px 8px", marginTop: 5
-              }}
-              value={rank} onChange={e => setRank(e.target.value)} required
-            />
-          </div>
-          <div style={{
-            gridColumn: "1 / span 2", textAlign: "center", display: "flex", justifyContent: "center",
-            alignItems: "center", gap: 18, flexWrap: "wrap"
-          }}>
-            <button type="submit" className="ct-btn"
-              style={{
-                display: "inline-block", background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)",
-                color: "#fff", fontWeight: "bold", padding: "15px 40px", borderRadius: 999, fontSize: "1.18rem",
-                border: "none", boxShadow: "0 2px 14px #7c3aed30", margin: "12px 0 6px", cursor: "pointer",
-                transition: "transform .12s, box-shadow .12s"
-              }}
-            >Find Eligible Colleges</button>
-          </div>
-        </form>
-        {locked && !paid && (
-          <div style={{ textAlign: "center", marginTop: 38 }}>
-            <div style={{
-              background: "#fdf2f8", border: "1.3px solid #fbcfe8", borderRadius: 14,
-              color: "#be185d", fontSize: 24, fontWeight: 800, padding: "24px 8px", marginBottom: 20
+        <form onSubmit={handlePredict} style={{
+          display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center", alignItems: "flex-end", marginBottom: 22
+        }}>
+          {/* ROUND SELECTOR */}
+          <div style={{ flex: 1, minWidth: 150, maxWidth: 210 }}>
+            <label style={{ fontWeight: 800, color: "#9333ea", fontSize: 17, display: "block", marginBottom: 7 }}>Round</label>
+            <select value={round} onChange={e => setRound(e.target.value)} style={{
+              width: "100%", fontSize: 18, borderRadius: 9, padding: "9px 11px", border: "1.5px solid #a5b4fc", background: "#f8fafc"
             }}>
-              {eligibleCount} eligible college{eligibleCount !== 1 ? "s" : ""} found!
-            </div>
-            <button className="ct-btn" onClick={handlePayment}
+              <option value="R1">Round 1</option>
+              <option value="R2">Round 2</option>
+              <option value="R3">Round 3</option>
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 180, maxWidth: 350 }}>
+            <label style={{ fontWeight: 800, color: "#3730a3", fontSize: 17, display: "block", marginBottom: 7 }}>Course</label>
+            <select value={course} onChange={e => setCourse(e.target.value)} style={{
+              width: "100%", fontSize: 18, borderRadius: 9, padding: "9px 11px", border: "1.5px solid #a5b4fc", background: "#f8fafc"
+            }}>
+              <option value="">Select Course</option>
+              {options.courses.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 180, maxWidth: 350 }}>
+            <label style={{ fontWeight: 800, color: "#059669", fontSize: 17, display: "block", marginBottom: 7 }}>Category</label>
+            <select value={category} onChange={e => setCategory(e.target.value)} style={{
+              width: "100%", fontSize: 18, borderRadius: 9, padding: "9px 11px", border: "1.5px solid #6ee7b7", background: "#f8fafc"
+            }}>
+              <option value="">Select Category</option>
+              {options.categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 150, maxWidth: 210 }}>
+            <label style={{ fontWeight: 800, color: "#3730a3", fontSize: 17, display: "block", marginBottom: 7 }}>Your Rank</label>
+            <input type="number" min={1} max={200000} value={rank} onChange={e => setRank(e.target.value.replace(/^0+/, ""))} required
               style={{
-                background: "linear-gradient(90deg, #f472b6 0%, #06b06a 100%)", fontWeight: 700,
-                fontSize: "1.14rem", padding: "13px 34px", borderRadius: 999, border: "none",
-                color: "#fff", boxShadow: "0 2px 10px #7c3aed15", cursor: "pointer", marginTop: 0
-              }}>
-              Pay ₹10 & Unlock Details
+                width: "100%", fontSize: 18, borderRadius: 9, padding: "9px 11px", border: "1.5px solid #a5b4fc", background: "#f8fafc"
+              }} />
+          </div>
+          <button type="submit" style={{
+            background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)", color: "#fff", fontWeight: 900,
+            border: "none", borderRadius: 999, padding: "13px 36px", fontSize: "1.25rem",
+            marginTop: 15, marginLeft: 0, boxShadow: "0 3px 16px #7c3aed28", cursor: "pointer"
+          }}>
+            Find Eligible Colleges
+          </button>
+        </form>
+
+        {/* UPI Payment/Unlock info */}
+        {eligibleCount !== null && locked && (
+          <div style={{
+            maxWidth: 590, margin: "34px auto 0", background: "#fff7ed",
+            borderRadius: 16, boxShadow: "0 2px 18px #7c3aed11", padding: "20px 28px 28px", textAlign: "center"
+          }}>
+            <div style={{
+              fontWeight: 800, fontSize: 22, color: "#7c3aed", marginBottom: 6
+            }}>
+              {eligibleCount} colleges found. Pay <span style={{ color: "#059669" }}>₹10</span> to unlock full list &amp; download!
+            </div>
+            <div style={{
+              background: "#fffbe5", borderRadius: 10, padding: "10px 12px 6px", margin: "0 auto 13px",
+              color: "#a16207", fontSize: 15.6, fontWeight: 700, textAlign: "left", maxWidth: 410
+            }}>
+              <span style={{ fontWeight: 700 }}>
+                <span style={{ color: "#ea580c" }}>Important:</span> If you pay using a UPI app (GPay, PhonePe, etc.) and see a <span style={{ color: "#e11d48" }}>"Payment could not be completed"</span> message, <u>do not worry!</u> <br />
+                <span style={{ color: "#3730a3" }}>
+                  If money is debited, simply click <b>Retry Unlock</b> below. Your payment will be verified and you’ll get access instantly.
+                </span>
+                <br />
+                <span style={{ color: "#ef4444" }}><b>Never pay twice.</b></span> <br />
+                This message is common for UPI app payments. If payment was debited, <b>Retry Unlock</b> or contact support with your payment/order ID.
+              </span>
+            </div>
+            <button disabled={paying || polling} onClick={handleUnlock} style={{
+              background: paying ? "#a5b4fc" : "linear-gradient(90deg,#7c3aed,#06b06a 100%)",
+              fontWeight: 900, fontSize: "1.14rem", borderRadius: 999, padding: "14px 36px", border: "none",
+              color: "#fff", boxShadow: "0 2px 10px #7c3aed15", cursor: "pointer", marginTop: 0
+            }}>
+              {paying ? "Loading..." : "Pay ₹10 & Unlock Details"}
             </button>
-            <div style={{ marginTop: 8, color: "#818cf8", fontSize: 13 }}>One-time payment, unlock instantly!</div>
-            {polling && <div style={{ color: "#818cf8", fontWeight: 600, marginTop: 12 }}>Waiting for payment confirmation...</div>}
-            <button onClick={handleRetryUnlock} disabled={polling} style={{
-              marginTop: 18, fontSize: 15, fontWeight: 600, background: "#ede9fe",
-              color: "#4f46e5", padding: "10px 28px", borderRadius: 13, border: "none", cursor: "pointer"
-            }}>Retry Unlock</button>
-            <div style={{ color: "#e11d48", marginTop: 12, fontSize: 14 }}>
-              <b>Note:</b> For UPI app payments, do not close or refresh this page after payment.<br />
-              If money is debited and you’re not unlocked, wait a minute then click <b>Retry Unlock</b>.<br />
-              <b>Never pay twice</b>. For support, contact Flexiworks with your order/payment ID.
+            <div style={{ marginTop: 7, color: "#818cf8", fontSize: 13 }}>One-time payment, unlock instantly!</div>
+            {polling &&
+              <div style={{ color: "#818cf8", fontWeight: 600, marginTop: 12 }}>
+                Waiting for payment confirmation...<br />
+                (If paid, just wait a few seconds, or use Retry Unlock below.)
+              </div>}
+            {orderId &&
+              <button onClick={handleRetryUnlock} style={{
+                marginTop: 14, background: "#9333ea", color: "#fff", fontWeight: 800,
+                border: "none", borderRadius: 8, fontSize: 17, padding: "8px 32px", cursor: "pointer"
+              }}>
+                Retry Unlock
+              </button>}
+            <div style={{
+              margin: "18px 0 0",
+              fontSize: 14.5,
+              color: "#818cf8",
+              textAlign: "center",
+              fontStyle: "italic",
+              lineHeight: 1.6
+            }}>
+              Disclaimer: This tool is based on publicly available data based on previous years cutoff. Actual seat availability, cutoffs, and admission outcomes may vary for the current year.
             </div>
           </div>
         )}
-        {paid && groupedEligible && Object.keys(groupedEligible).length > 0 && (
-          <section style={{ marginTop: 36 }}>
-            <h2 style={{ fontSize: "2rem", fontWeight: 900, color: "#7c3aed", textAlign: "center", marginBottom: 30 }}>
-              Eligible Colleges (Grouped by Branch)
-            </h2>
-            <div>
-              <div style={{ textAlign: "right", marginBottom: 10 }}>
-                <button onClick={handleDownloadCSV} style={{
-                  background: "linear-gradient(90deg, #7c3aed 0%, #06b06a 100%)", color: "#fff",
-                  fontWeight: 700, border: "none", borderRadius: 999, padding: "11px 22px", fontSize: "1.03rem",
-                  boxShadow: "0 1px 6px #7c3aed24", cursor: "pointer", marginRight: 10
-                }}>Download as CSV</button>
-                <button onClick={handleDownloadPDF} style={{
-                  background: "linear-gradient(90deg, #f472b6 0%, #7c3aed 100%)", color: "#fff",
-                  fontWeight: 700, border: "none", borderRadius: 999, padding: "11px 22px", fontSize: "1.03rem",
-                  boxShadow: "0 1px 6px #7c3aed24", cursor: "pointer"
-                }}>Download as PDF</button>
-              </div>
-              {Object.keys(groupedEligible).map(branchName => (
-                <div key={branchName} style={{
-                  background: "#f8fafc", borderRadius: 15, border: "2px solid #a7f3d0", marginBottom: 38,
-                  boxShadow: "0 2px 8px 0 #e0e7ff25", padding: "30px 12px"
-                }}>
-                  <div style={{
-                    fontSize: "1.25rem", fontWeight: 800, color: "#06b06a", borderBottom: "2px solid #6ee7b7",
-                    paddingBottom: 7, marginBottom: 22
-                  }}>{branchName}</div>
-                  <div style={{ overflowX: "auto" }}>
-                    <table style={{
-                      width: "100%", borderCollapse: "collapse", background: "#f0fdfa", fontSize: "1rem"
-                    }}>
-                      <thead>
-                        <tr>
-                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>College Code</th>
-                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>College Name</th>
-                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Course</th>
-                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Category</th>
-                          <th style={{ background: "#a7f3d0", color: "#3730a3", fontWeight: 700, padding: "10px 12px" }}>Cutoff Rank</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {groupedEligible[branchName].map((col, idx) => (
-                          <tr key={idx} style={{ background: idx % 2 ? "#f0fdfa" : "#fff" }}>
-                            <td style={{ padding: "9px 12px" }}>{col.college_code}</td>
-                            <td style={{ padding: "9px 12px" }}>{col.college_name}</td>
-                            <td style={{ padding: "9px 12px" }}>{col.course}</td>
-                            <td style={{ padding: "9px 12px" }}>{col.category}</td>
-                            <td style={{ padding: "9px 12px" }}>{col.cutoff_rank}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
+
+        {/* Report - grouped eligible table */}
+        {groupedEligible && !locked &&
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 24, color: "#7c3aed", margin: "34px 0 16px" }}>
+              Eligible Colleges <span style={{ color: "#0891b2" }}>(Grouped by Branch)</span>
             </div>
-          </section>
-        )}
+            {Object.keys(groupedEligible).length === 0 &&
+              <div style={{ color: "#ef4444", fontWeight: 700, fontSize: 19, marginTop: 19 }}>No eligible colleges found.</div>}
+            {Object.entries(groupedEligible).map(([branch, rows]) => (
+              <div key={branch} style={{
+                margin: "16px 0 30px", borderRadius: 12, background: "#f8fafc",
+                border: "2px solid #a7f3d0", boxShadow: "0 1px 7px #7c3aed0a"
+              }}>
+                <div style={{
+                  background: "#d1fae5", fontWeight: 900, color: "#059669", fontSize: 18,
+                  padding: "10px 0 8px 20px", borderRadius: "12px 12px 0 0"
+                }}>{branch}</div>
+                <table style={{
+                  width: "100%", borderCollapse: "collapse", fontSize: 16, marginTop: 0
+                }}>
+                  <thead>
+                    <tr style={{ background: "#f1f5f9" }}>
+                      <th style={{ textAlign: "left", padding: "8px 8px" }}>College Code</th>
+                      <th style={{ textAlign: "left", padding: "8px 8px" }}>College Name</th>
+                      <th>Course</th>
+                      <th>Category</th>
+                      <th>Cutoff Rank</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, idx) => (
+                      <tr key={row.college_code + row.college_name + idx}
+                        style={{ background: idx % 2 ? "#fff" : "#f9fafb" }}>
+                        <td style={{ padding: "7px 8px" }}>{row.college_code}</td>
+                        <td style={{ padding: "7px 8px" }}>{row.college_name}</td>
+                        <td style={{ textAlign: "center" }}>{row.course}</td>
+                        <td style={{ textAlign: "center" }}>{row.category}</td>
+                        <td style={{ textAlign: "center" }}>{row.cutoff_rank}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "center", gap: 22, margin: "22px 0 10px" }}>
+              <button onClick={handleDownloadCSV} style={{
+                background: "#22c55e", color: "#fff", fontWeight: 800, border: "none", borderRadius: 11,
+                padding: "10px 30px", fontSize: 17, boxShadow: "0 2px 10px #a7f3d018", cursor: "pointer"
+              }}>
+                Download as CSV
+              </button>
+              <button onClick={handleDownloadPDF} style={{
+                background: "#7c3aed", color: "#fff", fontWeight: 800, border: "none", borderRadius: 11,
+                padding: "10px 30px", fontSize: 17, boxShadow: "0 2px 10px #a7f3d018", cursor: "pointer"
+              }}>
+                Download as PDF
+              </button>
+            </div>
+          </div>
+        }
       </main>
-	  <div style={{
-	    background: "#fffbe5",
-		borderRadius: 10,
-		padding: "10px 12px 6px",
-		margin: "0 auto 13px",
-		color: "#a16207",
-		fontSize: 15.6,
-		fontWeight: 700,
-		textAlign: "left",
-		maxWidth: 410
-	  }}>
-	    <span style={{ fontWeight: 700 }}>
-		  <span style={{ color: "#ea580c" }}>Important:</span> If you pay using a UPI app (GPay, PhonePe, etc.) and see a <span style={{ color: "#e11d48" }}>"Payment could not be completed"</span> message, <u>do not worry!</u> <br />
-		  <span style={{ color: "#3730a3" }}>
-		    If money is debited, simply click <b>Retry Unlock</b> below. Your payment will be verified and you’ll get access instantly.
-		  </span>
-		  <br />
-		  <span style={{ color: "#ef4444" }}><b>Never pay twice.</b></span> <br />
-		  This message is common for UPI app payments. If payment was debited, <b>Retry Unlock</b> or contact support with your payment/order ID.
-		</span>
-	  </div>
-	  {/* === Disclaimer Block === */}
-	  <div style={{
-	    margin: "18px 0 0",
-		fontSize: 14.5,
-		color: "#818cf8",
-		textAlign: "center",
-		fontStyle: "italic",
-		lineHeight: 1.6
-      }}>
-	    Disclaimer: This tool is based on publicly available data based on previous years’ cutoffs. Actual seat availability, cutoffs, and admission outcomes may vary for the current year.
-	  </div>
-      <footer style={{
-        margin: "24px 0 8px",
-        color: "#7c3aed",
-        textAlign: "center",
-        fontSize: 15.5,
-        fontWeight: 600,
-        letterSpacing: ".015em"
-      }}>
-        &copy; {new Date().getFullYear()} CET College Predictor &nbsp; | &nbsp;
-        <button style={{
-          color: '#0ea5e9', background: "none", border: "none", cursor: "pointer",
-          textDecoration: "underline", fontSize: 15.5, padding: 0, fontWeight: 600
-        }} onClick={() => setAboutOpen(true)}>
-          About Us
-        </button>
-      </footer>
+      {/* About/Guide Modal */}
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      {/* Footer */}
+      <footer style={{
+        margin: "34px 0 8px", color: "#818cf8", textAlign: "center", fontSize: 14
+      }}>
+        © {new Date().getFullYear()} CET College Predictor &nbsp; | &nbsp;
+        <a href="#" onClick={e => { e.preventDefault(); setAboutOpen(true()); }} style={{ color: "#6366f1" }}>About Us</a>
+      </footer>
     </div>
   );
 }
+

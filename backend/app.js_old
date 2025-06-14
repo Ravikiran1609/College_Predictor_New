@@ -14,7 +14,6 @@ app.use(express.json({ limit: "10mb" }));
 
 const PORT = process.env.PORT || 5000;
 
-// Load all rounds' data at startup
 const ROUND_FILES = {
   R1: "Final_Data.csv",
   R2: "Final_data_second_round.csv",
@@ -36,21 +35,32 @@ function norm(str) {
   return (str || "").trim().toLowerCase();
 }
 
+let records = [];
+fs.createReadStream("Final_Data.csv")
+  .pipe(csv())
+  .on("data", (row) => records.push(row))
+  .on("end", () => console.log("CSV Loaded:", records.length, "rows"));
+
 // Razorpay config (use your actual keys)
 const razorpay = new Razorpay({
-  key_id: "rzp_live_YoU8Mex88gOhS9",
-  key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",
+  key_id: "rzp_live_YoU8Mex88gOhS9",        // your Razorpay key_id
+  key_secret: "CE0e3X6F3VtRQN6TRb8rD68Y",   // your Razorpay key_secret
 });
+
+// ======== PAID ORDERS TRACKING (in-memory Set, replace with DB in prod) ========
 const paidOrders = new Set();
+
+// WEBHOOK secret string (set this in Razorpay dashboard)
 const RAZORPAY_WEBHOOK_SECRET = "ravi123";
 
-// Razorpay webhook
+// Razorpay Webhook handler: Mark order as paid when payment.captured
 app.post("/api/razorpay-webhook", (req, res) => {
   const signature = req.headers["x-razorpay-signature"];
   const expectedSignature = crypto
     .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
     .update(req.rawBody)
     .digest("hex");
+  console.log("Webhook received raw:", req.rawBody?.toString()); // DEBUG
   if (signature !== expectedSignature) {
     console.log("Invalid webhook signature", signature, expectedSignature);
     return res.status(400).send("Invalid signature");
@@ -64,11 +74,14 @@ app.post("/api/razorpay-webhook", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Payment status
+// Fallback: Check payment status by order_id (frontend should poll after payment)
 app.get("/api/payment-status", async (req, res) => {
   const { order_id } = req.query;
   if (!order_id) return res.json({ paid: false });
+
   if (paidOrders.has(order_id)) return res.json({ paid: true });
+
+  // Fallback: Check Razorpay Orders API directly if not already marked paid
   try {
     const order = await razorpay.orders.fetch(order_id);
     if (order.status === "paid") {
@@ -81,7 +94,7 @@ app.get("/api/payment-status", async (req, res) => {
   res.json({ paid: false });
 });
 
-// Dropdown options, by round
+// For dropdowns: always return ACTUAL CSV values
 app.get("/api/options", (req, res) => {
   const round = req.query.round || "R1";
   const records = roundRecords[round] || [];
@@ -104,7 +117,20 @@ app.post("/api/predict", (req, res) => {
   res.json({ eligibleCount: result.length, locked: true });
 });
 
-// Razorpay order
+// Eligibility prediction (for count before unlock)
+app.post("/api/predict", (req, res) => {
+  const { course, category, rank } = req.body;
+  if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
+  const result = records.filter(
+    (r) =>
+      norm(r.course) === norm(course) &&
+      norm(r.category) === norm(category) &&
+      parseInt(rank) <= parseInt(r.cutoff_rank)
+  );
+  res.json({ eligibleCount: result.length, locked: true });
+});
+
+// Razorpay order creation
 app.post("/api/create-order", async (req, res) => {
   const { amount } = req.body;
   const payment_capture = 1;
@@ -128,20 +154,23 @@ app.post("/api/create-order", async (req, res) => {
   }
 });
 
-// Unlock after payment: grouped by branch (per round)
+// Unlock after payment: group eligible colleges by branch, ascending by cutoff_rank
 app.post("/api/unlock", (req, res) => {
-  const { course, category, rank, order_id, round = "R1" } = req.body;
+  const { course, category, rank, order_id } = req.body;
   if (!paidOrders.has(order_id)) {
     return res.status(402).json({ error: "Payment not confirmed for this order." });
   }
   const userRank = parseInt(rank);
-  const records = roundRecords[round] || [];
+
+  // Find all eligible records (no branch filter)
   const eligible = records.filter(
     (r) =>
       norm(r.course) === norm(course) &&
       norm(r.category) === norm(category) &&
       userRank <= parseInt(r.cutoff_rank)
   );
+
+  // Group by branch, and sort each group by cutoff rank
   const grouped = {};
   eligible.forEach(row => {
     const branch = row.branch || "Other";
@@ -151,10 +180,11 @@ app.post("/api/unlock", (req, res) => {
   for (const branch in grouped) {
     grouped[branch].sort((a, b) => parseInt(a.cutoff_rank) - parseInt(b.cutoff_rank));
   }
+
   res.json({ groupedEligible: grouped });
 });
 
-// PDF report (per round, but client must send groupedEligible)
+// ======= PDF REPORT ENDPOINT (Grouped Table By Branch) ======= //
 app.post("/api/generate-pdf", (req, res) => {
   const { groupedEligible } = req.body;
   const doc = new PDFDocument({ margin: 30, size: "A4" });
@@ -170,8 +200,11 @@ app.post("/api/generate-pdf", (req, res) => {
     doc.fontSize(13).fillColor("red").text("No eligible colleges found.");
   } else {
     for (const branchName of Object.keys(groupedEligible)) {
+      // Branch header
       doc.fontSize(15).fillColor("green").text(branchName, { underline: true });
       doc.moveDown(0.2);
+
+      // Table header
       doc.fontSize(12).fillColor("black");
       doc.text(
         [
@@ -185,7 +218,14 @@ app.post("/api/generate-pdf", (req, res) => {
       );
       doc.moveDown(0.1);
       doc.fontSize(11);
-      doc.text("".padEnd(90, "-"), { continued: false });
+
+      // Divider line
+      doc.text(
+        "".padEnd(90, "-"),
+        { continued: false }
+      );
+
+      // Table rows
       groupedEligible[branchName].forEach((col, idx) => {
         doc.text(
           [
@@ -198,11 +238,14 @@ app.post("/api/generate-pdf", (req, res) => {
           { continued: false }
         );
       });
+
       doc.moveDown(1.2);
     }
   }
   doc.end();
 });
+
+// Helper function for "columnized" text output
 function padCell(text, width) {
   text = String(text || "");
   if (text.length >= width) return text.slice(0, width - 2) + ".. ";
@@ -210,4 +253,3 @@ function padCell(text, width) {
 }
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
-
