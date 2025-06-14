@@ -16,11 +16,11 @@ const PORT = process.env.PORT || 5000;
 
 // File mapping for each round
 const ROUND_FILES = {
-  "R1": "Final_Data.csv",
-  "R2": "Final_data_second_round.csv",
-  "R3": "Final_data_Third_Round.csv"
+  "Round 1": "Final_Data.csv",
+  "Round 2": "Final_data_second_round.csv",
+  "Round 3": "Final_data_Third_Round.csv"
 };
-const roundRecords = {};
+const roundRecords = { "Round 1": [], "Round 2": [], "Round 3": [] };
 for (const [round, file] of Object.entries(ROUND_FILES)) {
   roundRecords[round] = [];
   if (fs.existsSync(file)) {
@@ -87,7 +87,8 @@ app.get("/api/payment-status", async (req, res) => {
 
 // Dropdown options, by round
 app.get("/api/options", (req, res) => {
-  const round = req.query.round || "R1";
+  const round = req.query.round || "Round 1";
+  console.log("[OPTIONS] Requested round:", round);
   const records = roundRecords[round] || [];
   const courses = [...new Set(records.map(r => (r.course || "").trim()))].filter(Boolean).sort();
   const categories = [...new Set(records.map(r => (r.category || "").trim()))].filter(Boolean).sort();
@@ -97,7 +98,7 @@ app.get("/api/options", (req, res) => {
 // Predict eligible count (per round)
 app.post("/api/predict", (req, res) => {
   let { course, category, rank, round } = req.body;
-  round = round || "R1";
+  round = round || "Round 1";
   const records = roundRecords[round] || [];
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
   const result = records.filter(
@@ -136,7 +137,7 @@ app.post("/api/create-order", async (req, res) => {
 // Unlock after payment: grouped by branch (per round)
 app.post("/api/unlock", (req, res) => {
   let { course, category, rank, order_id, round } = req.body;
-  round = round || "R1";
+  round = round || "Round 1";
   if (!paidOrders.has(order_id)) {
     return res.status(402).json({ error: "Payment not confirmed for this order." });
   }
@@ -216,4 +217,3 @@ function padCell(text, width) {
 }
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
-
