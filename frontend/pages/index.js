@@ -10,12 +10,22 @@ function AboutModal({ open, onClose }) {
       background: "rgba(48,19,69,0.24)", display: "flex", justifyContent: "center", alignItems: "center"
     }}>
       <div style={{
-        background: "#fff", maxWidth: 530, width: "90vw", borderRadius: 18, boxShadow: "0 10px 32px #7c3aed30",
-        padding: "35px 26px 30px 28px", position: "relative", border: "2px solid #a5b4fc"
+        background: "#fff",
+        maxWidth: 530,
+        width: "92vw",
+        maxHeight: "92vh",
+        overflowY: "auto",
+        borderRadius: 18,
+        boxShadow: "0 10px 32px #7c3aed30",
+        padding: "35px 18px 28px 18px",
+        position: "relative",
+        border: "2px solid #a5b4fc",
+        margin: 6
       }}>
         <button style={{
-          position: "absolute", right: 16, top: 12, fontSize: 32, color: "#7c3aed", background: "none",
-          border: "none", cursor: "pointer", fontWeight: 900, lineHeight: 1
+          position: "absolute", right: 16, top: 12, fontSize: 32, color: "#7c3aed",
+          background: "none", border: "none", cursor: "pointer", fontWeight: 900, lineHeight: 1,
+          zIndex: 2
         }} onClick={onClose} title="Close">&times;</button>
         <h1 style={{
           fontSize: "2.1rem", fontWeight: 900, color: "#7c3aed", marginBottom: 12, marginTop: 0
@@ -72,6 +82,7 @@ function AboutModal({ open, onClose }) {
     </div>
   );
 }
+
 
 // --- MAIN PAGE ---
 export default function Home() {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 // --- AboutModal (customize as needed) ---
+// --- AboutModal (Fully Styled, Matches Screenshot) ---
 function AboutModal({ open, onClose }) {
   if (!open) return null;
   return (
@@ -9,43 +10,63 @@ function AboutModal({ open, onClose }) {
       background: "rgba(48,19,69,0.24)", display: "flex", justifyContent: "center", alignItems: "center"
     }}>
       <div style={{
-        background: "#f8f6ff", maxWidth: 540, width: "90vw", borderRadius: 16, boxShadow: "0 12px 64px #6366f115",
-        padding: "40px 28px 34px 28px", position: "relative", border: "1.5px solid #d1d5db"
+        background: "#fff", maxWidth: 530, width: "90vw", borderRadius: 18, boxShadow: "0 10px 32px #7c3aed30",
+        padding: "35px 26px 30px 28px", position: "relative", border: "2px solid #a5b4fc"
       }}>
         <button style={{
           position: "absolute", right: 16, top: 12, fontSize: 32, color: "#7c3aed", background: "none",
           border: "none", cursor: "pointer", fontWeight: 900, lineHeight: 1
         }} onClick={onClose} title="Close">&times;</button>
-        <h1 style={{ fontSize: "2rem", fontWeight: 900, color: "#7c3aed", marginBottom: 10, marginTop: 0 }}>About Us</h1>
-        <p style={{ fontSize: 16.7, color: "#2d205b", marginBottom: 26 }}>
-          <strong>CET College Predictor</strong> is a vibrant, secure web platform designed to help students quickly discover which colleges they are eligible for, based on their CET rank and category.<br /><br />
-          <span style={{ color: "#06b06a", fontWeight: 600 }}>This website is proudly owned and operated by <b>Flexiworks</b>.</span>
-        </p>
+        <h1 style={{
+          fontSize: "2.1rem", fontWeight: 900, color: "#7c3aed", marginBottom: 12, marginTop: 0
+        }}>About Us</h1>
+        <div style={{ fontSize: 15.7, color: "#2d205b", marginBottom: 20 }}>
+          <b>CET College Predictor</b> is a vibrant, secure web platform designed to help students quickly discover which colleges they are eligible for, based on their CET rank and category.
+        </div>
+        <div style={{ color: "#059669", fontWeight: 700, marginBottom: 20, fontSize: 16 }}>
+          This website is proudly owned and operated by <b style={{ color: "#22c55e" }}>Flexiworks</b>.
+        </div>
         <h2 style={{
-          fontSize: "1.15rem", color: "#4f46e5", marginBottom: 9, fontWeight: 800, marginTop: 28, letterSpacing: "0.01em"
+          fontSize: "1.18rem", color: "#4f46e5", marginBottom: 13, fontWeight: 800, marginTop: 24, letterSpacing: "0.01em"
         }}>User Guide</h2>
         <ol style={{
-          color: "#2d205b", fontSize: 15.6, lineHeight: 1.63, paddingLeft: 24, marginBottom: 20
+          color: "#2d205b", fontSize: 15.3, lineHeight: 1.63, paddingLeft: 24, marginBottom: 18
         }}>
-          <li><b>Select Round, Course, Category:</b><br />Choose the round and use the dropdowns to select your course and category.</li>
-          <li><b>Enter your CET Rank:</b><br />Type your CET rank in the provided box.</li>
-          <li><b>Find Eligible Colleges:</b><br />Click on <b>Find Eligible Colleges</b> to see how many you’re eligible for.</li>
-          <li><b>Unlock Full List & Download:</b><br />Pay ₹10 to instantly unlock and download your result.</li>
+          <li><b>Select your KCET Round, Course and Category:</b>
+            <br />
+            Use the dropdowns on the homepage to select your preferred Round of Option Entry, course (like Engineering, Agriculture, etc.) and your reservation category (GM, SC, ST, etc.).
+          </li>
+          <li><b>Enter your CET Rank:</b>
+            <br />
+            Type your CET rank in the provided box.
+          </li>
+          <li><b>Find Eligible Colleges:</b>
+            <br />
+            Click on <b>Find Eligible Colleges</b> to see how many colleges you are eligible for, grouped by branch.
+          </li>
+          <li><b>Unlock Full List & Download:</b>
+            <br />
+            Pay a small, secure fee (₹10 via Razorpay) to instantly view the detailed list and download your result as a PDF or CSV file.
+          </li>
+          <li><b>Download or Print:</b>
+            <br />
+            After unlocking, download your personalized college list report in PDF or CSV format for future reference.
+          </li>
         </ol>
         <div style={{
-          color: "#7c3aed", fontSize: 13, marginTop: 24, fontWeight: 600
+          color: "#7c3aed", fontSize: 12.8, marginTop: 20, fontWeight: 600
         }}>
           <b>Note:</b> This predictor is based on the previous year's official CET cutoff data. Actual cutoffs and seat availability may vary for the current year.
         </div>
         <div style={{
-          marginTop: 22, color: "#818cf8", fontSize: 13.2, fontStyle: "italic"
+          marginTop: 16, color: "#818cf8", fontSize: 13.3, fontStyle: "italic"
         }}>
-          Disclaimer: The information provided is sourced from publicly available official data. The website is not affiliated with KEA or any government agency.  
+          <b>Disclaimer:</b> This tool is based on publicly available data. The website is not affiliated with KEA or any government agency.
         </div>
         <div style={{
-          marginTop: 26, color: "#2d205b", fontSize: 14, fontWeight: 600
+          marginTop: 24, color: "#2d205b", fontSize: 14.5, fontWeight: 600
         }}>
-          <b>For queries or feedback:</b> contact <b>Flexiworks</b> at <a href="mailto:info@flexiworks.in" style={{ color: "#0ea5e9", textDecoration: "underline" }}>info@flexiworks.in</a>
+          <b>For queries or feedback:</b> contact Flexiworks at <a href="mailto:rgk1695@gmail.com" style={{ color: "#0ea5e9", textDecoration: "underline" }}>rgk1695@gmail.com</a>
         </div>
       </div>
     </div>
