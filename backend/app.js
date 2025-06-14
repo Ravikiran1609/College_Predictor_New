@@ -21,15 +21,23 @@ const ROUND_FILES = {
   "Round 3": "Final_data_Third_Round.csv"
 };
 const roundRecords = { "Round 1": [], "Round 2": [], "Round 3": [] };
+const roundLoaded = { "Round 1": false, "Round 2": false, "Round 3": false };
+
+// Async CSV loader
 for (const [round, file] of Object.entries(ROUND_FILES)) {
   roundRecords[round] = [];
+  roundLoaded[round] = false;
   if (fs.existsSync(file)) {
     fs.createReadStream(file)
       .pipe(csv())
       .on("data", (row) => roundRecords[round].push(row))
-      .on("end", () => console.log(`CSV Loaded for ${round}:`, roundRecords[round].length, "rows"));
+      .on("end", () => {
+        roundLoaded[round] = true;
+        console.log(`CSV Loaded for ${round}:`, roundRecords[round].length, "rows");
+      });
   } else {
     console.log(`File not found: ${file}, ${round} will be empty.`);
+    roundLoaded[round] = true; // treat missing as "loaded"
   }
 }
 
@@ -88,7 +96,10 @@ app.get("/api/payment-status", async (req, res) => {
 // Dropdown options, by round
 app.get("/api/options", (req, res) => {
   const round = req.query.round || "Round 1";
-  console.log("[OPTIONS] Requested round:", round);
+  // Only respond if data is ready
+  if (!roundLoaded[round]) {
+    return res.status(202).json({ courses: [], categories: [], loading: true });
+  }
   const records = roundRecords[round] || [];
   const courses = [...new Set(records.map(r => (r.course || "").trim()))].filter(Boolean).sort();
   const categories = [...new Set(records.map(r => (r.category || "").trim()))].filter(Boolean).sort();
@@ -217,3 +228,4 @@ function padCell(text, width) {
 }
 
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+
