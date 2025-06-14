@@ -14,14 +14,15 @@ app.use(express.json({ limit: "10mb" }));
 
 const PORT = process.env.PORT || 5000;
 
-// Load all rounds' data at startup
+// File mapping for each round
 const ROUND_FILES = {
-  R1: "Final_Data.csv",
-  R2: "Final_data_second_round.csv",
-  R3: "Final_data_Third_Round.csv"
+  "R1": "Final_Data.csv",
+  "R2": "Final_data_second_round.csv",
+  "R3": "Final_data_Third_Round.csv"
 };
-const roundRecords = { R1: [], R2: [], R3: [] };
+const roundRecords = {};
 for (const [round, file] of Object.entries(ROUND_FILES)) {
+  roundRecords[round] = [];
   if (fs.existsSync(file)) {
     fs.createReadStream(file)
       .pipe(csv())
@@ -56,10 +57,13 @@ app.post("/api/razorpay-webhook", (req, res) => {
     return res.status(400).send("Invalid signature");
   }
   const event = req.body.event;
-  if (event === "payment.captured") {
-    const orderId = req.body.payload.payment.entity.order_id;
-    paidOrders.add(orderId);
-    console.log(`[Webhook] Order PAID: ${orderId}`);
+  if (event === "payment.captured" || event === "order.paid") {
+    const orderId = (req.body.payload && req.body.payload.payment && req.body.payload.payment.entity && req.body.payload.payment.entity.order_id)
+      || (req.body.payload && req.body.payload.order && req.body.payload.order.entity && req.body.payload.order.entity.id);
+    if (orderId) {
+      paidOrders.add(orderId);
+      console.log(`[Webhook] Order PAID: ${orderId}`);
+    }
   }
   res.json({ status: "ok" });
 });
@@ -92,7 +96,8 @@ app.get("/api/options", (req, res) => {
 
 // Predict eligible count (per round)
 app.post("/api/predict", (req, res) => {
-  const { course, category, rank, round = "R1" } = req.body;
+  let { course, category, rank, round } = req.body;
+  round = round || "R1";
   const records = roundRecords[round] || [];
   if (!course || !category || !rank) return res.status(400).json({ error: "Missing params" });
   const result = records.filter(
@@ -130,7 +135,8 @@ app.post("/api/create-order", async (req, res) => {
 
 // Unlock after payment: grouped by branch (per round)
 app.post("/api/unlock", (req, res) => {
-  const { course, category, rank, order_id, round = "R1" } = req.body;
+  let { course, category, rank, order_id, round } = req.body;
+  round = round || "R1";
   if (!paidOrders.has(order_id)) {
     return res.status(402).json({ error: "Payment not confirmed for this order." });
   }
