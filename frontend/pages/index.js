@@ -27,7 +27,7 @@ function AboutModal({ open, onClose }) {
         <ol style={{
           color: "#2d205b", fontSize: 15.6, lineHeight: 1.63, paddingLeft: 24, marginBottom: 20
         }}>
-          <li><b>Select your Course and Category:</b><br />Use the dropdowns to select your course and category.</li>
+          <li><b>Select Round, Course, Category:</b><br />Choose the round and use the dropdowns to select your course and category.</li>
           <li><b>Enter your CET Rank:</b><br />Type your CET rank in the provided box.</li>
           <li><b>Find Eligible Colleges:</b><br />Click on <b>Find Eligible Colleges</b> to see how many you’re eligible for.</li>
           <li><b>Unlock Full List & Download:</b><br />Pay ₹10 to instantly unlock and download your result.</li>
@@ -54,7 +54,7 @@ function AboutModal({ open, onClose }) {
 
 // --- MAIN PAGE ---
 export default function Home() {
-  const [round, setRound] = useState("Round 1");  // <--- NEW
+  const [round, setRound] = useState("R1"); // R1, R2, R3
   const [course, setCourse] = useState("");
   const [category, setCategory] = useState("");
   const [rank, setRank] = useState("");
@@ -71,14 +71,26 @@ export default function Home() {
 
   const apiURL = "";
 
+  // Fetch dropdowns when round changes
   useEffect(() => {
-    fetch(`${apiURL}/api/options?round=${encodeURIComponent(round)}`)
+    fetch(`${apiURL}/api/options?round=${round}`)
       .then(res => res.json())
       .then(data => {
         setCourses(data.courses || []);
         setCategories(data.categories || []);
+        setCourse("");
+        setCategory("");
       });
-  }, [round]);  // Reload options if round changes
+  }, [round]);
+
+  const validateForm = () => {
+    if (!course || !category || !rank) {
+      setFormError("Please select Course, Category, and enter Rank.");
+      return false;
+    }
+    setFormError("");
+    return true;
+  };
 
   const handlePredict = async () => {
     if (!validateForm()) return;
@@ -90,7 +102,7 @@ export default function Home() {
     const res = await fetch(`${apiURL}/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ round, course, category, rank }),
+      body: JSON.stringify({ course, category, rank, round }),
     });
     const data = await res.json();
     if (data.error) {
@@ -103,7 +115,6 @@ export default function Home() {
     }
   };
 
-  // --- Razorpay Integration (supports webhook/intent/collect/UPI QR flows) ---
   const handlePayment = async () => {
     setFormError("");
     if (!window.Razorpay) {
@@ -138,6 +149,7 @@ export default function Home() {
     pollPaymentStatus(order.id);
   };
 
+  // Poll payment status (webhook or Orders API fallback)
   const pollPaymentStatus = (orderId) => {
     setPolling(true);
     let attempts = 0;
@@ -173,7 +185,7 @@ export default function Home() {
     const res2 = await fetch(`/api/unlock`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ round, course, category, rank, order_id: orderId }),
+      body: JSON.stringify({ course, category, rank, order_id: orderId, round }),
     });
     if (res2.ok) {
       const data2 = await res2.json();
@@ -202,7 +214,7 @@ export default function Home() {
     link.click();
   };
 
-  // Download PDF (must match backend endpoint)
+  // Download PDF
   const handleDownloadPDF = async () => {
     const response = await fetch("/api/generate-pdf", {
       method: "POST",
@@ -233,7 +245,7 @@ export default function Home() {
         <div style={{
           maxWidth: 940, width: "100%", display: "flex", alignItems: "center", gap: 26, justifyContent: "center"
         }}>
-          <img src="/college-logo.png" alt="College Hero" style={{
+          <img src="/flexiworks-logo.png" alt="Flexiworks" style={{
             width: 64, height: 64, borderRadius: 13, border: "2.5px solid #fff",
             background: "#fff", boxShadow: "0 1.5px 6px #fff8", objectFit: "contain"
           }} />
@@ -269,19 +281,18 @@ export default function Home() {
             textAlign: "center", marginBottom: 14
           }}>{formError}</div>
         )}
-        <form style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 20 }}
+        <form style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24, marginBottom: 20 }}
           onSubmit={e => { e.preventDefault(); handlePredict(); }}>
           <div>
             <label style={{ fontWeight: 700, color: "#4f46e5" }}>Round</label>
             <select style={{
               width: "100%", fontSize: 17, border: "2px solid #dbeafe", borderRadius: 9, padding: "10px 8px", marginTop: 5
-            }} value={round} onChange={e => setRound(e.target.value)} required>
-              <option value="Round 1">Round 1</option>
-              <option value="Round 2">Round 2</option>
-              <option value="Round 3">Round 3</option>
+            }} value={round} onChange={e => setRound(e.target.value)}>
+              <option value="R1">Round 1</option>
+              <option value="R2">Round 2</option>
+              <option value="R3">Round 3</option>
             </select>
           </div>
-          {/* --- COURSE and CATEGORY DROPDOWNS as before (but now in column 2 and 3) --- */}
           <div>
             <label style={{ fontWeight: 700, color: "#4f46e5" }}>Course</label>
             <select style={{
@@ -304,7 +315,6 @@ export default function Home() {
               ))}
             </select>
           </div>
-          {/* --- RANK input below, spans all columns --- */}
           <div style={{ gridColumn: "1 / span 3" }}>
             <label style={{ fontWeight: 700, color: "#4f46e5" }}>Your Rank</label>
             <input type="number" min="1"
@@ -316,7 +326,7 @@ export default function Home() {
             />
           </div>
           <div style={{
-            gridColumn: "1 / span 2", textAlign: "center", display: "flex", justifyContent: "center",
+            gridColumn: "1 / span 3", textAlign: "center", display: "flex", justifyContent: "center",
             alignItems: "center", gap: 18, flexWrap: "wrap"
           }}>
             <button type="submit" className="ct-btn"
