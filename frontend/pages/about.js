@@ -31,8 +31,8 @@ export default function About() {
         User Guide
       </h2>
       <ol style={{ color: "#334155", fontSize: 17, lineHeight: 1.6, paddingLeft: 24, marginBottom: 26 }}>
-        <li><b>1. Select your Course and Category:</b><br />
-          Use the dropdowns on the homepage to select your preferred course (like Engineering, Agriculture, etc.) and your reservation category (GM, SC, ST, etc.).
+        <li><b>1. Select your KCET Round, Course and Category:</b><br />
+          Use the dropdowns on the homepage to select your preferred Round of Option Entry, course (like Engineering, Agriculture, etc.) and your reservation category (GM, SC, ST, etc.).
         </li>
         <li><b>2. Enter your CET Rank:</b><br />
           Type your CET rank in the provided box.
